@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { useTheme } from './hooks/useTheme';
+import { ModelsPage } from './pages/ModelsPage';
+import { DatasetPage } from './pages/DatasetPage';
+import { ConfigPage } from './pages/ConfigPage';
 
 // Placeholder pages — will be built in Phase 2–4
 function PlaceholderPage({ title, description }: { title: string; description: string }) {
@@ -28,9 +31,9 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Navigate to="/models" replace />} />
-            <Route path="/models" element={<PlaceholderPage title="Models" description="Select a base detection model for training" />} />
-            <Route path="/dataset" element={<PlaceholderPage title="Dataset" description="Configure and validate your training dataset" />} />
-            <Route path="/config" element={<PlaceholderPage title="Configuration" description="Set training hyperparameters and run options" />} />
+            <Route path="/models" element={<ModelsPage />} />
+            <Route path="/dataset" element={<DatasetPage />} />
+            <Route path="/config" element={<ConfigPage />} />
             <Route path="/launch" element={<PlaceholderPage title="Launch" description="Review and launch your training run" />} />
             <Route path="/tracking" element={<PlaceholderPage title="Tracking" description="Monitor active training runs" />} />
             <Route path="/history" element={<PlaceholderPage title="Run History" description="View and manage past training runs" />} />
