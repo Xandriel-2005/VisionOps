@@ -10,6 +10,9 @@ class BaseDetector(ABC):
     to be auto-discovered by the VisionOps registry.
     """
 
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+
     @abstractmethod
     def load(self, weights_path: Optional[str] = None) -> None:
         """

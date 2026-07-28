@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings2, ArrowRight, ArrowLeft, Loader2, Save } from 'lucide-react';
+import { Settings2, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import api from '../api/client';
 import type { TrainingConfig, GPUProfile } from '../types';
 
