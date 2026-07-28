@@ -1,0 +1,90 @@
+# ========================
+# VisionOps .gitignore
+# ========================
+
+# ---------- Environment ----------
+.env
+.env.local
+.env.*.local
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.venv/
+venv/
+env/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ---------- Node / TypeScript ----------
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+.eslintcache
+
+# ---------- IDE ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Docker ----------
+docker-compose.override.yml
+
+# ---------- PostgreSQL (Docker volumes) ----------
+pgdata/
+
+# ---------- Airflow ----------
+airflow/logs/
+airflow/plugins/__pycache__/
+airflow/*.pid
+airflow/airflow.db
+
+# ---------- MLflow ----------
+mlruns/
+mlartifacts/
+mlflow.db
+
+# ---------- Model weights / artifacts ----------
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+weights/
+runs/
+
+# ---------- Dataset outputs (generated) ----------
+datasets/merged/
+datasets/preprocessed/
+
+# ---------- Logs ----------
+*.log
+logs/
+
+# ---------- Testing ----------
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
