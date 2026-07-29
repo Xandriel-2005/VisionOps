@@ -7,6 +7,7 @@ from app.models.run_history import RunHistory
 from app.models.last_config import LastUsedConfig
 from app.schemas.run import RunCreate, RunResponse
 from app.schemas.config import ConfigUpdate
+from app.services.airflow_client import airflow
 
 router = APIRouter(prefix="/api/runs", tags=["Runs"])
 
@@ -15,7 +16,7 @@ DAG_ID = "visionops_training"
 
 @router.post("", response_model=RunResponse, status_code=201)
 async def create_run(payload: RunCreate, db: AsyncSession = Depends(get_db)):
-    """Create a new run record. Airflow DAG triggering will be added in Phase 3."""
+    """Create a new run record and trigger the corresponding Airflow DAG."""
     run = RunHistory(
         **payload.model_dump(),
         airflow_dag_id=DAG_ID,
@@ -23,6 +24,25 @@ async def create_run(payload: RunCreate, db: AsyncSession = Depends(get_db)):
     db.add(run)
     await db.flush()
     await db.refresh(run)
+    
+    # Trigger Airflow DAG
+    dag_run_id = await airflow.trigger_dag(
+        dag_id=DAG_ID,
+        conf={
+            "run_id": run.id,
+            "model_name": run.model_name,
+            "dataset_path": run.dataset_path,
+            "epochs": run.epochs,
+            "batch_size": run.batch_size,
+            "learning_rate": run.learning_rate,
+            "image_size": run.image_size
+        }
+    )
+    
+    if dag_run_id:
+        run.airflow_run_id = dag_run_id
+        await db.flush()
+        
     return run
 
 

@@ -17,6 +17,7 @@ def parse_args():
     parser.add_argument("--image-size", type=int, default=640)
     parser.add_argument("--device", type=str, default="")
     parser.add_argument("--run-name", type=str, default="visionops_run")
+    parser.add_argument("--run-id", type=int, help="VisionOps DB Run ID for tracking correlation")
     
     return parser.parse_args()
 
@@ -45,6 +46,7 @@ def main():
     img_size = config.get("image_size")
     device = config.get("device", "")
     run_name = config.get("run_name", "visionops_run")
+    visionops_run_id = config.get("run_id")
     
     if not model_name or not dataset_path:
         raise ValueError("model_name and dataset_path are required.")
@@ -64,7 +66,8 @@ def main():
             "epochs": epochs,
             "batch_size": batch_size,
             "learning_rate": lr,
-            "image_size": img_size
+            "image_size": img_size,
+            "visionops_run_id": str(visionops_run_id) if visionops_run_id else None
         })
         
         # Run training loop
