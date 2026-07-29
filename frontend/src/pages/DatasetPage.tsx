@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Folder, CheckCircle, XCircle, ArrowRight, ArrowLeft, Search, CornerLeftUp, X } from 'lucide-react';
+import { Database, Folder, CheckCircle, XCircle, ArrowRight, ArrowLeft, Search } from 'lucide-react';
 import api from '../api/client';
 import type { ValidationResult } from '../types';
 
@@ -25,36 +25,16 @@ export function DatasetPage() {
     }
   };
 
-  // Browser state
-  const [browserOpen, setBrowserOpen] = useState(false);
-  const [browserPath, setBrowserPath] = useState('');
-  const [browserData, setBrowserData] = useState<{current_path: string, parent_path: string, directories: string[]} | null>(null);
-  const [browserLoading, setBrowserLoading] = useState(false);
-
-  const fetchBrowse = async (targetPath: string) => {
-    setBrowserLoading(true);
+  const handleBrowseNative = async () => {
     try {
-      const res = await api.get('/api/dataset/browse', { params: { path: targetPath } });
-      setBrowserData(res.data);
-      setBrowserPath(res.data.current_path);
+      const response = await api.get<{path: string}>('/api/dataset/browse-native');
+      if (response.data.path) {
+        setPath(response.data.path);
+        handleValidate(response.data.path);
+      }
     } catch (err) {
-      console.error('Failed to browse', err);
-      // fallback just close or ignore
-    } finally {
-      setBrowserLoading(false);
-    }
-  };
-
-  const openBrowser = () => {
-    setBrowserOpen(true);
-    fetchBrowse(path || '');
-  };
-
-  const handleSelectFolder = () => {
-    if (browserData) {
-      setPath(browserData.current_path);
-      setBrowserOpen(false);
-      handleValidate(browserData.current_path);
+      console.error('Failed to open native browser:', err);
+      alert('Could not open folder browser. Please ensure the backend is running locally.');
     }
   };
 
@@ -85,7 +65,7 @@ export function DatasetPage() {
               value={path}
               onChange={(e) => setPath(e.target.value)}
             />
-            <button className="btn btn-secondary" onClick={openBrowser} type="button">
+            <button className="btn btn-secondary" onClick={handleBrowseNative} type="button">
               <Search size={16} /> Browse
             </button>
             <button className="btn btn-primary" onClick={() => handleValidate(path)} disabled={!path || validating}>
@@ -154,63 +134,6 @@ export function DatasetPage() {
           Next Step: Configuration <ArrowRight size={16} />
         </button>
       </div>
-
-      {browserOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="card w-full max-w-2xl shadow-xl flex flex-col" style={{ maxHeight: '80vh' }}>
-            <div className="flex justify-between items-center mb-md pb-sm" style={{ borderBottom: '1px solid var(--outline-variant)' }}>
-              <h2 className="headline-sm flex items-center gap-xs"><Folder size={20} className="text-primary"/> Browse Server Filesystem</h2>
-              <button className="btn btn-ghost p-xs" onClick={() => setBrowserOpen(false)}><X size={20}/></button>
-            </div>
-            
-            <div className="flex gap-sm mb-md">
-              <button 
-                className="btn btn-secondary p-sm" 
-                disabled={!browserData?.parent_path}
-                onClick={() => fetchBrowse(browserData?.parent_path || '')}
-              >
-                <CornerLeftUp size={16} />
-              </button>
-              <input 
-                type="text" 
-                className="form-input form-input-mono flex-1" 
-                value={browserPath}
-                onChange={e => setBrowserPath(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && fetchBrowse(browserPath)}
-              />
-              <button className="btn btn-primary" onClick={() => fetchBrowse(browserPath)}>Go</button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto border rounded-md p-sm" style={{ borderColor: 'var(--outline-variant)', minHeight: '300px' }}>
-              {browserLoading ? (
-                <div className="flex h-full items-center justify-center text-muted">Loading...</div>
-              ) : browserData?.directories.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-muted">No subdirectories found.</div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-xs">
-                  {browserData?.directories.map(dir => (
-                    <div 
-                      key={dir} 
-                      className="flex items-center gap-sm p-sm rounded-md cursor-pointer hover:bg-primary/10 transition-colors"
-                      onClick={() => fetchBrowse(browserData.current_path ? `${browserData.current_path}\\${dir}`.replace('\\\\', '\\') : dir)}
-                    >
-                      <Folder size={16} className="text-primary" />
-                      <span className="truncate flex-1" title={dir}>{dir}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex justify-end gap-sm mt-md pt-sm" style={{ borderTop: '1px solid var(--outline-variant)' }}>
-              <button className="btn btn-ghost" onClick={() => setBrowserOpen(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSelectFolder} disabled={!browserData?.current_path}>
-                Select This Folder
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

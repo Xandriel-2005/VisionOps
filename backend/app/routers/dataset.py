@@ -58,3 +58,38 @@ async def browse_directory(path: str = ""):
         raise HTTPException(status_code=403, detail="Permission denied to access this directory")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/browse-native")
+async def browse_native():
+    """Opens a native OS folder picker dialog using tkinter and returns the selected path."""
+    import tkinter as tk
+    from tkinter import filedialog
+    import threading
+    
+    result_path = ""
+    
+    def open_dialog():
+        nonlocal result_path
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+        
+        # Bring to front on Windows
+        import sys
+        if sys.platform == "win32":
+            root.lift()
+            root.focus_force()
+            
+        folder_selected = filedialog.askdirectory(title="Select YOLO Dataset Folder")
+        if folder_selected:
+            # normalize path
+            result_path = os.path.abspath(folder_selected)
+            
+        root.destroy()
+        
+    # Run tkinter in a separate thread so it doesn't block the asyncio event loop or clash with uvicorn thread
+    thread = threading.Thread(target=open_dialog)
+    thread.start()
+    thread.join()
+    
+    return {"path": result_path}
