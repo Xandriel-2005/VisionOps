@@ -7,22 +7,9 @@ import { ConfigPage } from './pages/ConfigPage';
 import { LaunchPage } from './pages/LaunchPage';
 import { TrackingPage } from './pages/TrackingPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { InferencePage } from './pages/InferencePage';
+import { SettingsPage } from './pages/SettingsPage';
 
-// Placeholder pages — will be built in Phase 2–4
-function PlaceholderPage({ title, description }: { title: string; description: string }) {
-  return (
-    <div>
-      <div className="page-header">
-        <h1>{title}</h1>
-        <p className="body-md text-muted">{description}</p>
-      </div>
-      <div className="card" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
-        <p className="headline-sm" style={{ marginBottom: 'var(--space-sm)' }}>🚧</p>
-        <p className="body-md text-muted">This page will be built in Phase 2–4</p>
-      </div>
-    </div>
-  );
-}
 
 function App() {
   const { theme, toggleTheme } = useTheme();
@@ -40,8 +27,8 @@ function App() {
             <Route path="/launch" element={<LaunchPage />} />
             <Route path="/tracking" element={<TrackingPage />} />
             <Route path="/history" element={<HistoryPage />} />
-            <Route path="/inference" element={<PlaceholderPage title="Inference" description="Run object detection on images and video" />} />
-            <Route path="/settings" element={<PlaceholderPage title="Settings" description="Manage GPU profiles and preferences" />} />
+            <Route path="/inference" element={<InferencePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
       </div>
