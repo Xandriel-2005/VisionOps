@@ -54,10 +54,14 @@ def validate_dataset(path: str) -> Dict[str, Any]:
         
     # Mocking stats for scaffold
     result["valid"] = True
+    names = data.get('names', [])
+    if isinstance(names, dict):
+        names = list(names.values())
+        
     result["summary"] = {
         "total_images": 1205,
         "total_labels": 3402,
-        "classes": {name: (100 * (i+1)) for i, name in enumerate(data.get('names', []))},
+        "classes": {name: (100 * (i+1)) for i, name in enumerate(names)},
         "sample_images": []
     }
     

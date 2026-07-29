@@ -61,35 +61,43 @@ async def browse_directory(path: str = ""):
 
 @router.get("/browse-native")
 async def browse_native():
-    """Opens a native OS folder picker dialog using tkinter and returns the selected path."""
-    import tkinter as tk
-    from tkinter import filedialog
-    import threading
+    import subprocess
+    import sys
     
-    result_path = ""
-    
-    def open_dialog():
-        nonlocal result_path
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        
-        # Bring to front on Windows
-        import sys
+    script = """
+import tkinter as tk
+from tkinter import filedialog
+import sys
+import os
+
+root = tk.Tk()
+root.withdraw()
+root.attributes('-topmost', True)
+
+if sys.platform == "win32":
+    root.lift()
+    root.focus_force()
+
+folder = filedialog.askdirectory(title="Select YOLO Dataset Folder")
+if folder:
+    print(os.path.abspath(folder))
+"""
+    try:
+        # Avoid command window popping up on Windows
+        kwargs = {}
         if sys.platform == "win32":
-            root.lift()
-            root.focus_force()
+            kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
             
-        folder_selected = filedialog.askdirectory(title="Select YOLO Dataset Folder")
-        if folder_selected:
-            # normalize path
-            result_path = os.path.abspath(folder_selected)
-            
-        root.destroy()
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            check=True,
+            **kwargs
+        )
         
-    # Run tkinter in a separate thread so it doesn't block the asyncio event loop or clash with uvicorn thread
-    thread = threading.Thread(target=open_dialog)
-    thread.start()
-    thread.join()
-    
-    return {"path": result_path}
+        path = result.stdout.strip()
+        return {"path": path}
+    except Exception as e:
+        print(f"Error opening native browser: {e}")
+        return {"path": ""}

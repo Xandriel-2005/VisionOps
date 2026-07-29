@@ -2,6 +2,8 @@ import json
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
+from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
 
 # Default arguments for the DAG
 default_args = {
@@ -24,25 +26,35 @@ with DAG(
     tags=['visionops', 'training'],
 ) as dag:
     
-    # In Airflow 2.0+, dag_run.conf is accessed via Jinja templates
-    # We pass the conf as a JSON string to the python script
+
     
-    train_command = """
-    # In a real environment, this might SSH into a GPU box or run inside a specific container
-    # For local scaffold, we run it directly in the Airflow worker container or host
-    python /opt/visionops/train.py \
-      --model-name '{{ dag_run.conf.get("model_name", "yolov8n") }}' \
-      --dataset-path '{{ dag_run.conf.get("dataset_path", "") }}' \
-      --epochs {{ dag_run.conf.get("epochs", 50) }} \
-      --batch-size {{ dag_run.conf.get("batch_size", 16) }} \
-      --learning-rate {{ dag_run.conf.get("learning_rate", 0.01) }} \
-      --image-size {{ dag_run.conf.get("image_size", 640) }} \
-      --run-id '{{ dag_run.conf.get("run_id", "") }}'
-    """
-    
-    run_training = BashOperator(
+    # Use DockerOperator to spin up the ML Worker container
+    run_training = DockerOperator(
         task_id='run_training_script',
-        bash_command=train_command,
+        image='visionops-ml-worker:latest',
+        api_version='auto',
+        auto_remove='force',
+        command="""
+        python /app/train.py \
+          --model-name '{{ dag_run.conf.get("model_name", "yolov8n") }}' \
+          --dataset-path '{{ dag_run.conf.get("dataset_path", "") }}' \
+          --epochs {{ dag_run.conf.get("epochs", 50) }} \
+          --batch-size {{ dag_run.conf.get("batch_size", 16) }} \
+          --learning-rate {{ dag_run.conf.get("learning_rate", 0.01) }} \
+          --image-size {{ dag_run.conf.get("image_size", 640) }} \
+          --run-id '{{ dag_run.conf.get("run_id", "") }}'
+        """,
+        docker_url='unix://var/run/docker.sock',
+        network_mode='bridge',
+        mounts=[
+            # Mount the scripts and datasets into the ML container
+            Mount(source='/opt/airflow/train.py', target='/app/train.py', type='bind', read_only=True),
+            Mount(source='/opt/airflow/detectors', target='/app/detectors', type='bind', read_only=True),
+            Mount(source='/opt/airflow/datasets', target='/opt/airflow/datasets', type='bind')
+        ],
+        environment={
+            'MLFLOW_TRACKING_URI': 'http://host.docker.internal:5000'
+        }
     )
     
     run_training

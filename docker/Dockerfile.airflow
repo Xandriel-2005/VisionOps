@@ -1,0 +1,10 @@
+# docker/Dockerfile.airflow
+FROM apache/airflow:2.10.5-python3.11
+
+USER root
+# Install docker so Airflow can use DockerOperator (Docker-in-Docker)
+RUN apt-get update && apt-get install -y docker.io && apt-get clean
+
+USER airflow
+# Install Docker provider for Airflow
+RUN pip install --no-cache-dir apache-airflow-providers-docker

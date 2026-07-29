@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Database, Folder, CheckCircle, XCircle, ArrowRight, ArrowLeft, Search } from 'lucide-react';
+import { Folder, CheckCircle, XCircle, ArrowRight, ArrowLeft, Search } from 'lucide-react';
 import api from '../api/client';
 import type { ValidationResult } from '../types';
+import { FolderBrowserModal } from '../components/FolderBrowserModal';
 
 export function DatasetPage() {
   const [path, setPath] = useState('');
@@ -25,18 +26,7 @@ export function DatasetPage() {
     }
   };
 
-  const handleBrowseNative = async () => {
-    try {
-      const response = await api.get<{path: string}>('/api/dataset/browse-native');
-      if (response.data.path) {
-        setPath(response.data.path);
-        handleValidate(response.data.path);
-      }
-    } catch (err) {
-      console.error('Failed to open native browser:', err);
-      alert('Could not open folder browser. Please ensure the backend is running locally.');
-    }
-  };
+  const [isBrowserOpen, setIsBrowserOpen] = useState(false);
 
   const handleNext = () => {
     if (result?.valid) {
@@ -65,7 +55,7 @@ export function DatasetPage() {
               value={path}
               onChange={(e) => setPath(e.target.value)}
             />
-            <button className="btn btn-secondary" onClick={handleBrowseNative} type="button">
+            <button className="btn btn-secondary" onClick={() => setIsBrowserOpen(true)} type="button">
               <Search size={16} /> Browse
             </button>
             <button className="btn btn-primary" onClick={() => handleValidate(path)} disabled={!path || validating}>
@@ -108,7 +98,7 @@ export function DatasetPage() {
                 </div>
                 <div className="flex flex-col gap-xs mt-sm" style={{ gridColumn: '1 / -1' }}>
                   <span className="label-caps text-muted mb-xs">Class Distribution</span>
-                  <div className="flex gap-sm flex-wrap">
+                  <div className="flex gap-sm" style={{ flexWrap: 'wrap' }}>
                     {Object.entries(result.summary.classes).map(([name, count]) => (
                       <span key={name} className="status-chip pending">
                         {name}: {count}
@@ -134,6 +124,17 @@ export function DatasetPage() {
           Next Step: Configuration <ArrowRight size={16} />
         </button>
       </div>
+      
+      {isBrowserOpen && (
+        <FolderBrowserModal 
+          onClose={() => setIsBrowserOpen(false)}
+          onSelect={(selectedPath) => {
+            setPath(selectedPath);
+            setIsBrowserOpen(false);
+            handleValidate(selectedPath);
+          }}
+        />
+      )}
     </div>
   );
 }
