@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Cpu, Zap, Activity, ArrowRight, Loader2 } from 'lucide-react';
+import { Cpu, Zap, Activity, ArrowRight, Loader2, Upload } from 'lucide-react';
 import api from '../api/client';
 import type { ModelInfo } from '../types';
 
@@ -8,6 +8,7 @@ export function ModelsPage() {
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +30,44 @@ export function ModelsPage() {
       // Save selected model temporarily (e.g. in sessionStorage) so Config page can pre-fill it later
       sessionStorage.setItem('visionops_draft_model', selectedModel);
       navigate('/dataset');
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    if (!file.name.endsWith('.pt')) {
+      alert('Only .pt weights are supported for Ultralytics models.');
+      return;
+    }
+    
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await api.post('/api/models/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      // Add custom model to the list so user can select it
+      const customModel: ModelInfo = {
+        name: res.data.filename.replace('.pt', ''),
+        display_name: `Custom: ${res.data.filename}`,
+        description: 'Uploaded custom weights file.',
+        parameters: 'Unknown',
+        speed: 'Unknown',
+        accuracy: 'Unknown'
+      };
+      setModels([...models, customModel]);
+      setSelectedModel(customModel.name);
+    } catch (err) {
+      console.error('Failed to upload weights', err);
+      alert('Failed to upload custom weights.');
+    } finally {
+      setUploading(false);
+      // Reset input
+      e.target.value = '';
     }
   };
 
@@ -82,6 +121,22 @@ export function ModelsPage() {
           ))}
         </div>
       )}
+
+      <div className="card mb-md bg-surface-container-highest">
+        <h3 className="headline-sm mb-sm flex items-center gap-xs">
+          <Upload size={18} className="text-primary" /> Upload Custom Weights
+        </h3>
+        <p className="body-sm text-muted mb-md">
+          Already have a fine-tuned `.pt` model? Upload it here to use it as the base architecture for further training or inference.
+        </p>
+        <div className="flex items-center gap-md">
+          <label className="btn btn-secondary cursor-pointer">
+            {uploading ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+            <span className="ml-xs">{uploading ? 'Uploading...' : 'Select .pt File'}</span>
+            <input type="file" className="hidden" accept=".pt" onChange={handleUpload} disabled={uploading} />
+          </label>
+        </div>
+      </div>
 
       <div className="flex justify-end pt-md" style={{ borderTop: '1px solid var(--outline-variant)' }}>
         <button 

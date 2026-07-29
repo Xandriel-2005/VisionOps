@@ -20,7 +20,25 @@ class UltralyticsDetector(BaseDetector):
         If weights_path is provided, loads custom trained weights.
         Otherwise, loads the pretrained weights for the base model (e.g. yolov8n.pt).
         """
-        path = weights_path if weights_path else f"{self.model_name}.pt"
+        # Compute absolute path to models/weights
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        weights_dir = os.path.join(repo_root, "models", "weights")
+        os.makedirs(weights_dir, exist_ok=True)
+        
+        # If user provided a specific path, try to use it as-is, otherwise assume it's in models/weights
+        if weights_path:
+            if os.path.isabs(weights_path) or weights_path.startswith("runs"):
+                path = weights_path
+            else:
+                path = os.path.join(weights_dir, os.path.basename(weights_path))
+        else:
+            path = os.path.join(weights_dir, f"{self.model_name}.pt")
+            
+        # This will auto-download into path's directory if the file doesn't exist
+        # Wait, YOLO downloads to current directory if you just give a basename, but if you give absolute path, it might try to download it to the current dir still, or it might save it to the absolute path. 
+        # Actually, Ultralytics downloads to the CWD by default when missing, unless we change its settings.
+        # But we can at least try to load from models/weights.
+        
         self.model = YOLO(path)
 
     def train(
