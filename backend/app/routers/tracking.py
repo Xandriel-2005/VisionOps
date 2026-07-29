@@ -19,9 +19,9 @@ async def get_live_tracking(run_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Run not found")
         
     airflow_status = "unknown"
-    if run.airflow_run_id:
+    if run.airflow_dag_run_id:
         # Fetch current Airflow status
-        status = await airflow.get_dag_run_status(run.airflow_dag_id, run.airflow_run_id)
+        status = await airflow.get_dag_run_status(run.airflow_dag_id, run.airflow_dag_run_id)
         if status:
             airflow_status = status
             

@@ -57,9 +57,16 @@ export interface ModelInfo {
   name: string;
   display_name: string;
   description: string;
-  parameters: string;
-  speed: string;
-  accuracy: string;
+  architecture: string;
+  status: string;
+  updated_at: string;
+  metrics?: Record<string, string | number>;
+  training_progress?: {
+    epoch: number;
+    total: number;
+    loss: number;
+    percent: number;
+  };
 }
 
 export interface DatasetSummary {
