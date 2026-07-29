@@ -4,6 +4,9 @@ import { useTheme } from './hooks/useTheme';
 import { ModelsPage } from './pages/ModelsPage';
 import { DatasetPage } from './pages/DatasetPage';
 import { ConfigPage } from './pages/ConfigPage';
+import { LaunchPage } from './pages/LaunchPage';
+import { TrackingPage } from './pages/TrackingPage';
+import { HistoryPage } from './pages/HistoryPage';
 
 // Placeholder pages — will be built in Phase 2–4
 function PlaceholderPage({ title, description }: { title: string; description: string }) {
@@ -34,9 +37,9 @@ function App() {
             <Route path="/models" element={<ModelsPage />} />
             <Route path="/dataset" element={<DatasetPage />} />
             <Route path="/config" element={<ConfigPage />} />
-            <Route path="/launch" element={<PlaceholderPage title="Launch" description="Review and launch your training run" />} />
-            <Route path="/tracking" element={<PlaceholderPage title="Tracking" description="Monitor active training runs" />} />
-            <Route path="/history" element={<PlaceholderPage title="Run History" description="View and manage past training runs" />} />
+            <Route path="/launch" element={<LaunchPage />} />
+            <Route path="/tracking" element={<TrackingPage />} />
+            <Route path="/history" element={<HistoryPage />} />
             <Route path="/inference" element={<PlaceholderPage title="Inference" description="Run object detection on images and video" />} />
             <Route path="/settings" element={<PlaceholderPage title="Settings" description="Manage GPU profiles and preferences" />} />
           </Routes>

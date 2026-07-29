@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import gpu_profiles, config, runs, models, dataset
+from app.routers import gpu_profiles, config, runs, models, dataset, tracking
 
 
 def create_app() -> FastAPI:
@@ -29,6 +29,7 @@ def create_app() -> FastAPI:
     app.include_router(runs.router)
     app.include_router(models.router)
     app.include_router(dataset.router)
+    app.include_router(tracking.router)
 
     @app.get("/api/health", tags=["Health"])
     async def health_check():
