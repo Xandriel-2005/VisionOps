@@ -16,6 +16,7 @@ class LastUsedConfig(Base):
     model_name = Column(String(50), nullable=False)
     dataset_path = Column(Text, nullable=False)
     use_bg_injection = Column(Boolean, nullable=False, default=False)
+    bg_images_path = Column(Text, nullable=False, default="")
     epochs = Column(Integer, nullable=False)
     batch_size = Column(Integer, nullable=False)
     learning_rate = Column(Float, nullable=False)
@@ -27,6 +28,9 @@ class LastUsedConfig(Base):
         ForeignKey("remote_gpu_profiles.id", ondelete="SET NULL"),
         nullable=True,
     )
+    schedule_type = Column(String(20), nullable=False, default="immediate")
+    schedule_expression = Column(String(100), nullable=True)
+    scheduled_for = Column(DateTime(timezone=True), nullable=True)
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
     def __repr__(self) -> str:

@@ -18,6 +18,7 @@ class RunHistory(Base):
     dataset_path = Column(Text, nullable=False)
     dataset_version_tag = Column(String(100), nullable=True)
     use_bg_injection = Column(Boolean, nullable=False, default=False)
+    bg_images_path = Column(Text, nullable=False, default="")
     epochs = Column(Integer, nullable=False)
     batch_size = Column(Integer, nullable=False)
     learning_rate = Column(Float, nullable=False)

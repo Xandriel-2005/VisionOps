@@ -1,11 +1,9 @@
-# ========================
-# VisionOps .gitignore
-# ========================
-
 # ---------- Environment ----------
 .env
 .env.local
 .env.*.local
+
+memory.md
 
 # ---------- Python ----------
 __pycache__/
@@ -90,4 +88,3 @@ Desktop.ini
 $RECYCLE.BIN/
 
 
-memory.md
