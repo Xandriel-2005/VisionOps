@@ -1,9 +1,4 @@
 version: "3.8"
-
-# ========================
-# VisionOps Infrastructure
-# ========================
-
 x-airflow-common: &airflow-common
   build:
     context: .
@@ -16,6 +11,8 @@ x-airflow-common: &airflow-common
     AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__WEBSERVER__SECRET_KEY: "visionops_secret_key_12345"
+    HOST_PROJECT_ROOT: ${HOST_PROJECT_ROOT:-/opt/airflow}
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
@@ -54,7 +51,6 @@ services:
     networks:
       - visionops
 
-  # ---------- Airflow Init (one-time) ----------
   airflow-init:
     <<: *airflow-common
     container_name: visionops-airflow-init
@@ -72,7 +68,6 @@ services:
           --email admin@visionops.local || true
     restart: "no"
 
-  # ---------- Airflow Webserver ----------
   airflow-webserver:
     <<: *airflow-common
     container_name: visionops-airflow-webserver
@@ -84,7 +79,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # ---------- Airflow Scheduler ----------
   airflow-scheduler:
     <<: *airflow-common
     container_name: visionops-airflow-scheduler
@@ -94,7 +88,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # ---------- Airflow Triggerer ----------
   airflow-triggerer:
     <<: *airflow-common
     container_name: visionops-airflow-triggerer
@@ -104,7 +97,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # ---------- MLflow ----------
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.17.0
     container_name: visionops-mlflow

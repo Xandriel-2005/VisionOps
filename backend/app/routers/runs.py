@@ -206,11 +206,16 @@ if RUN_MODE == 'remote':
     sync_to_gpu >> run_training >> sync_results >> cleanup_remote
     prev_task = cleanup_remote
 else:
+    # Determine host project root for DooD mounts
+    import os
+    HOST_PROJECT_ROOT = os.environ.get('HOST_PROJECT_ROOT', '/opt/airflow')
+
     run_training = DockerOperator(
         task_id='run_training_local',
         image='visionops-ml-worker:latest',
         api_version='auto',
         auto_remove='force',
+        mount_tmp_dir=False,
         command=f\"\"\"
         python /app/train.py \\
           --model-name '{{MODEL_NAME}}' \\
@@ -224,9 +229,9 @@ else:
         docker_url='unix://var/run/docker.sock',
         network_mode='bridge',
         mounts=[
-            Mount(source='/opt/airflow/train.py', target='/app/train.py', type='bind', read_only=True),
-            Mount(source='/opt/airflow/detectors', target='/app/detectors', type='bind', read_only=True),
-            Mount(source='/opt/airflow/datasets', target='/opt/airflow/datasets', type='bind')
+            Mount(source=f'{{HOST_PROJECT_ROOT}}/train.py', target='/app/train.py', type='bind', read_only=True),
+            Mount(source=f'{{HOST_PROJECT_ROOT}}/detectors', target='/app/detectors', type='bind', read_only=True),
+            Mount(source=f'{{HOST_PROJECT_ROOT}}/datasets', target='/opt/airflow/datasets', type='bind')
         ],
         environment={{'MLFLOW_TRACKING_URI': 'http://host.docker.internal:5000'}},
         dag=dag,

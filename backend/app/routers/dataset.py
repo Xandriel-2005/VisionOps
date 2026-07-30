@@ -22,21 +22,19 @@ async def browse_directory(path: str = ""):
     """Returns a list of subdirectories for the given path. Handles Windows drives if empty."""
     import sys
     
-    # If no path provided, return root drives (Windows) or root directory (Linux/Mac)
+    # Restrict to workspace datasets folder since Airflow Docker only mounts this directory
+    workspace_root = os.path.abspath(os.environ.get("HOST_PROJECT_ROOT", os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+    datasets_dir = os.path.join(workspace_root, "datasets")
+    os.makedirs(datasets_dir, exist_ok=True)
+    
+    # If no path provided, default to the datasets directory
     if not path:
-        if sys.platform == "win32":
-            import string
-            from ctypes import windll
-            drives = []
-            bitmask = windll.kernel32.GetLogicalDrives()
-            for letter in string.ascii_uppercase:
-                if bitmask & 1:
-                    drives.append(f"{letter}:\\")
-                bitmask >>= 1
-            return {"current_path": "", "directories": drives}
-        else:
-            path = "/"
-            
+        path = datasets_dir
+        
+    # Security/Compatibility check: ensure path is inside workspace
+    if not os.path.abspath(path).startswith(workspace_root):
+        raise HTTPException(status_code=403, detail="Dataset must be located inside the VisionOps workspace folder (e.g. VisionOps/datasets) so that Docker can access it.")
+        
     if not os.path.exists(path) or not os.path.isdir(path):
         raise HTTPException(status_code=404, detail="Directory not found")
         

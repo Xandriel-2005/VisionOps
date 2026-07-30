@@ -44,7 +44,9 @@ class ModelRegistry:
     def get_detector_class(self, model_name: str) -> Type[BaseDetector]:
         """Returns the uninstantiated detector class for a given model name."""
         if model_name not in self._detectors:
-            raise ValueError(f"Model '{model_name}' not found in registry.")
+            # Fallback to UltralyticsDetector for custom .pt weights
+            from detectors.ultralytics_detector import UltralyticsDetector
+            return UltralyticsDetector
         return self._detectors[model_name]
         
     def get_detector(self, model_name: str) -> BaseDetector:

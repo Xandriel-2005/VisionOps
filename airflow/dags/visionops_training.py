@@ -94,27 +94,32 @@ with DAG(
     )
 
     # ── LOCAL training path ──
+    # Determine host project root for DooD mounts
+    import os
+    HOST_PROJECT_ROOT = os.environ.get('HOST_PROJECT_ROOT', '/opt/airflow')
+
     run_training_local = DockerOperator(
         task_id='run_training_local',
         image='visionops-ml-worker:latest',
         api_version='auto',
         auto_remove='force',
-        command="""
+        mount_tmp_dir=False,
+        command=f"""
         python /app/train.py \
-          --model-name '{{ dag_run.conf.get("model_name", "yolov8n") }}' \
-          --dataset-path '{{ dag_run.conf.get("dataset_path", "") }}' \
-          --epochs {{ dag_run.conf.get("epochs", 50) }} \
-          --batch-size {{ dag_run.conf.get("batch_size", 16) }} \
-          --learning-rate {{ dag_run.conf.get("learning_rate", 0.01) }} \
-          --image-size {{ dag_run.conf.get("image_size", 640) }} \
-          --run-id '{{ dag_run.conf.get("run_id", "") }}'
+          --model-name '{{{{ dag_run.conf.get("model_name") }}}}' \
+          --dataset-path '{{{{ dag_run.conf.get("dataset_path") }}}}' \
+          --epochs {{{{ dag_run.conf.get("epochs", 1) }}}} \
+          --batch-size {{{{ dag_run.conf.get("batch_size", 16) }}}} \
+          --learning-rate {{{{ dag_run.conf.get("learning_rate", 0.001) }}}} \
+          --image-size {{{{ dag_run.conf.get("image_size", 640) }}}} \
+          --run-id '{{{{ dag_run.conf.get("run_id", "local_run") }}}}'
         """,
         docker_url='unix://var/run/docker.sock',
         network_mode='bridge',
         mounts=[
-            Mount(source='/opt/airflow/train.py', target='/app/train.py', type='bind', read_only=True),
-            Mount(source='/opt/airflow/detectors', target='/app/detectors', type='bind', read_only=True),
-            Mount(source='/opt/airflow/datasets', target='/opt/airflow/datasets', type='bind')
+            Mount(source=f'{HOST_PROJECT_ROOT}/train.py', target='/app/train.py', type='bind', read_only=True),
+            Mount(source=f'{HOST_PROJECT_ROOT}/detectors', target='/app/detectors', type='bind', read_only=True),
+            Mount(source=f'{HOST_PROJECT_ROOT}/datasets', target='/opt/airflow/datasets', type='bind')
         ],
         environment={
             'MLFLOW_TRACKING_URI': 'http://host.docker.internal:5000'
@@ -201,6 +206,11 @@ with DAG(
     cleanup_remote = BashOperator(
         task_id='cleanup_remote',
         bash_command=f"""
+        if [ "{{{{ dag_run.conf.get("run_mode", "local") }}}}" != "remote" ]; then
+            echo "Local mode: Skipping remote cleanup."
+            exit 0
+        fi
+        
         SSH_CMD='{_ssh_prefix()}'
         WORKSPACE='/tmp/visionops_run_{{{{ dag_run.conf.get("run_id", "") }}}}'
         $SSH_CMD "rm -rf $WORKSPACE" || true
