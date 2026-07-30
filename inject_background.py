@@ -1,17 +1,3 @@
-"""
-Inject / cleanup background images into a YOLO dataset.
-
-Adapted from the ml-pipeline reference project. This script:
-  inject: copies images from a source folder into the dataset's train/images/
-          directory, writing a manifest so they can be removed later.
-  cleanup: reads the manifest and deletes only the injected files, restoring the
-           dataset to its original state.
-
-Usage (CLI):
-  python inject_background.py inject  --source_dir /path/to/bg_images --dataset_path /path/to/dataset
-  python inject_background.py cleanup --dataset_path /path/to/dataset
-"""
-
 import argparse
 import os
 import shutil
