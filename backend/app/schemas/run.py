@@ -8,6 +8,7 @@ class RunCreate(BaseModel):
     dataset_path: str
     dataset_version_tag: str | None = None
     use_bg_injection: bool = False
+    bg_images_path: str = ""
     epochs: int = Field(..., gt=0)
     batch_size: int = Field(..., gt=0)
     learning_rate: float = Field(..., gt=0.0)
@@ -27,6 +28,7 @@ class RunResponse(BaseModel):
     dataset_path: str
     dataset_version_tag: str | None
     use_bg_injection: bool
+    bg_images_path: str
     epochs: int
     batch_size: int
     learning_rate: float

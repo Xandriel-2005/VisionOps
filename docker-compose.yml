@@ -22,6 +22,7 @@ x-airflow-common: &airflow-common
     - ./detectors:/opt/airflow/detectors
     - ./train.py:/opt/airflow/train.py
     - ./preprocess.py:/opt/airflow/preprocess.py
+    - ./inject_background.py:/opt/airflow/inject_background.py
     - ./datasets:/opt/airflow/datasets
     - /var/run/docker.sock:/var/run/docker.sock
   depends_on:

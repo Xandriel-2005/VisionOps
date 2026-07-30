@@ -14,6 +14,7 @@ class RemoteGPUProfile(Base):
     port = Column(Integer, nullable=False, default=22)
     username = Column(String(100), nullable=False)
     ssh_key_path = Column(Text, nullable=False)
+    venv_path = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     last_used_at = Column(DateTime(timezone=True), nullable=True)
 

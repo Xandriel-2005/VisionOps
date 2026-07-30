@@ -13,6 +13,7 @@ export function SettingsPage() {
   const [host, setHost] = useState('');
   const [username, setUsername] = useState('');
   const [keyPath, setKeyPath] = useState('');
+  const [venvPath, setVenvPath] = useState('');
   
   useEffect(() => {
     fetchProfiles();
@@ -34,6 +35,7 @@ export function SettingsPage() {
     setHost('');
     setUsername('');
     setKeyPath('');
+    setVenvPath('');
     setEditingId(null);
   };
 
@@ -43,6 +45,7 @@ export function SettingsPage() {
     setHost(profile.host);
     setUsername(profile.username);
     setKeyPath(profile.ssh_key_path);
+    setVenvPath(profile.venv_path || '');
   };
 
   const handleSave = async () => {
@@ -51,7 +54,8 @@ export function SettingsPage() {
         name,
         host,
         username,
-        ssh_key_path: keyPath
+        ssh_key_path: keyPath,
+        venv_path: venvPath || null
       };
       
       if (editingId) {
@@ -148,6 +152,11 @@ export function SettingsPage() {
                 <label className="label-caps">Private Key Path</label>
                 <input type="text" className="input" value={keyPath} onChange={e => setKeyPath(e.target.value)} placeholder="e.g. ~/.ssh/id_rsa" />
               </div>
+            </div>
+            
+            <div className="form-group">
+              <label className="label-caps">Virtual Env Path (Optional)</label>
+              <input type="text" className="input" value={venvPath} onChange={e => setVenvPath(e.target.value)} placeholder="e.g. /home/ubuntu/venv" />
             </div>
             
             <div className="flex gap-sm mt-sm">

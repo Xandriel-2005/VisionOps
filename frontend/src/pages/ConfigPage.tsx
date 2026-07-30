@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings2, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Settings2, ArrowRight, ArrowLeft, Loader2, Clock, Calendar } from 'lucide-react';
 import api from '../api/client';
 import type { TrainingConfig, GPUProfile } from '../types';
 
@@ -155,6 +155,20 @@ export function ConfigPage() {
               <span className="body-md">Inject Background Images (Negative Samples)</span>
             </label>
             <p className="form-hint ml-lg mt-xs">Helps reduce false positives by showing the model empty backgrounds.</p>
+            
+            {config.use_bg_injection && (
+              <div className="mt-sm ml-lg p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
+                <label className="form-label">Background Images Folder</label>
+                <input 
+                  type="text" 
+                  className="form-input form-input-mono" 
+                  placeholder="C:\background_images or /data/backgrounds"
+                  value={config.bg_images_path || ''}
+                  onChange={e => handleChange('bg_images_path', e.target.value)}
+                />
+                <p className="form-hint mt-xs">Path to a folder containing background images (no labels needed).</p>
+              </div>
+            )}
           </div>
 
           <div className="form-group mt-md pt-md" style={{ borderTop: '1px solid var(--outline-variant)' }}>
@@ -185,6 +199,53 @@ export function ConfigPage() {
               {gpuProfiles.length === 0 && (
                 <p className="form-hint text-status-running">No profiles configured. Add one in Settings.</p>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Run Scheduling Card */}
+        <div className="card flex flex-col gap-md" style={{ gridColumn: '1 / -1' }}>
+          <h3 className="headline-sm flex items-center gap-xs">
+            <Clock size={18} className="text-primary" /> Run Scheduling
+          </h3>
+          
+          <div className="form-group">
+            <label className="form-label">Schedule Type</label>
+            <select 
+              className="form-input" 
+              value={config.schedule_type}
+              onChange={e => handleChange('schedule_type', e.target.value)}
+            >
+              <option value="immediate">Immediate (Run now)</option>
+              <option value="one_time_future">One-Time Future</option>
+              <option value="recurring">Recurring (Cron)</option>
+            </select>
+          </div>
+
+          {config.schedule_type === 'recurring' && (
+            <div className="form-group p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
+              <label className="form-label flex items-center gap-xs"><Calendar size={14} /> Cron Expression</label>
+              <input 
+                type="text" 
+                className="form-input form-input-mono" 
+                placeholder="0 0 * * *"
+                value={config.schedule_expression || ''}
+                onChange={e => handleChange('schedule_expression', e.target.value)}
+              />
+              <p className="form-hint mt-xs">Use standard cron syntax (e.g. "0 0 * * *" for daily at midnight). Airflow will automatically generate a dynamic DAG for this schedule.</p>
+            </div>
+          )}
+
+          {config.schedule_type === 'one_time_future' && (
+            <div className="form-group p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
+              <label className="form-label flex items-center gap-xs"><Clock size={14} /> Scheduled Date & Time</label>
+              <input 
+                type="datetime-local" 
+                className="form-input" 
+                value={config.scheduled_for ? new Date(config.scheduled_for).toISOString().slice(0, 16) : ''}
+                onChange={e => handleChange('scheduled_for', new Date(e.target.value).toISOString())}
+              />
+              <p className="form-hint mt-xs">Select when the run should execute. Airflow will generate a single-run DAG for this time.</p>
             </div>
           )}
         </div>

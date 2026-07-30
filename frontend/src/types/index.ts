@@ -9,6 +9,7 @@ export interface GPUProfile {
   port: number;
   username: string;
   ssh_key_path: string;
+  venv_path: string | null;
   created_at: string;
   last_used_at: string | null;
 }
@@ -17,6 +18,7 @@ export interface TrainingConfig {
   model_name: string;
   dataset_path: string;
   use_bg_injection: boolean;
+  bg_images_path: string;
   epochs: number;
   batch_size: number;
   learning_rate: number;
@@ -24,6 +26,9 @@ export interface TrainingConfig {
   train_val_split: number;
   run_mode: RunMode;
   remote_gpu_profile_id: number | null;
+  schedule_type: ScheduleType;
+  schedule_expression: string | null;
+  scheduled_for: string | null;
   updated_at?: string | null;
 }
 
@@ -34,6 +39,7 @@ export interface RunRecord {
   dataset_path: string;
   dataset_version_tag: string | null;
   use_bg_injection: boolean;
+  bg_images_path: string;
   epochs: number;
   batch_size: number;
   learning_rate: number;

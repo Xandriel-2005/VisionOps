@@ -9,6 +9,7 @@ export function LaunchPage() {
   const [loading, setLoading] = useState(true);
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRemoteWarning, setShowRemoteWarning] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,23 +36,37 @@ export function LaunchPage() {
     loadConfig();
   }, []);
 
-  const handleLaunch = async () => {
+  const handleLaunch = () => {
+    if (!config) return;
+    if (config.run_mode === 'remote') {
+      setShowRemoteWarning(true);
+    } else {
+      executeLaunch();
+    }
+  };
+
+  const executeLaunch = async () => {
     if (!config) return;
     setLaunching(true);
     setError(null);
+    setShowRemoteWarning(false);
     try {
       // Create run (this triggers Airflow on backend)
       const res = await api.post('/api/runs', {
         model_name: config.model_name,
         dataset_path: config.dataset_path,
         use_bg_injection: config.use_bg_injection,
+        bg_images_path: config.bg_images_path,
         epochs: config.epochs,
         batch_size: config.batch_size,
         learning_rate: config.learning_rate,
         image_size: config.image_size,
         train_val_split: config.train_val_split,
         run_mode: config.run_mode,
-        remote_gpu_profile_id: config.remote_gpu_profile_id
+        remote_gpu_profile_id: config.remote_gpu_profile_id,
+        schedule_type: config.schedule_type,
+        schedule_expression: config.schedule_expression,
+        scheduled_for: config.scheduled_for
       });
       
       // Clear session drafts
@@ -116,6 +131,14 @@ export function LaunchPage() {
                 <span className="text-muted">Image Size</span>
                 <span className="mono-data">{config.image_size}px</span>
               </div>
+              <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
+                <span className="text-muted">Schedule</span>
+                <span className="label-caps">
+                  {config.schedule_type === 'immediate' && 'Immediate'}
+                  {config.schedule_type === 'recurring' && `Cron: ${config.schedule_expression}`}
+                  {config.schedule_type === 'one_time_future' && `Scheduled: ${new Date(config.scheduled_for || '').toLocaleString()}`}
+                </span>
+              </div>
             </div>
           </div>
           
@@ -164,6 +187,48 @@ export function LaunchPage() {
           )}
         </button>
       </div>
+
+      {showRemoteWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-surface p-xl rounded-lg max-w-lg w-full border border-outline-variant shadow-xl" style={{ margin: 'var(--space-md)' }}>
+            <h2 className="title-lg mb-md flex items-center gap-sm">
+              <Server className="text-primary" /> Remote GPU Setup Required
+            </h2>
+            <div className="body-md text-muted space-y-md">
+              <p>
+                You are about to launch training on a remote GPU server. 
+                Before proceeding, ensure the server meets these requirements:
+              </p>
+              <ul className="list-disc pl-lg space-y-sm">
+                <li><strong className="text-on-surface">SSH Access:</strong> The server must accept connections using your provided SSH key (passwordless login).</li>
+                <li><strong className="text-on-surface">Python Environment:</strong> Python 3 and pip must be installed.</li>
+                <li><strong className="text-on-surface">Dependencies:</strong> You must have Ultralytics (YOLO) and MLflow pre-installed in the default environment.</li>
+                <li><strong className="text-on-surface">Hardware:</strong> A properly configured GPU (e.g., CUDA drivers) must be available.</li>
+              </ul>
+              <p className="mt-md form-hint">
+                VisionOps Airflow will automatically create a temporary workspace workspace, copy the dataset and scripts via SSH, execute the training, and pull the trained weights back.
+              </p>
+            </div>
+            
+            <div className="flex justify-end gap-md mt-xl pt-md border-t border-outline-variant">
+              <button 
+                className="btn btn-ghost"
+                onClick={() => setShowRemoteWarning(false)}
+                disabled={launching}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={executeLaunch}
+                disabled={launching}
+              >
+                {launching ? 'Launching...' : 'Confirm & Launch'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
