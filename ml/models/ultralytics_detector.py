@@ -42,7 +42,7 @@ class UltralyticsDetector(BaseDetector):
                     epoch = trainer.epoch + 1
                     metrics = trainer.metrics if hasattr(trainer, "metrics") else {}
                     cb_instance.on_epoch_end(epoch, metrics)
-                self.model.add_callback("on_train_epoch_end", wrapper)
+                self.model.add_callback("on_fit_epoch_end", wrapper)
 
         self.results = self.model.train(data=dataset_yaml, **kwargs)
         return self._extract_metrics()

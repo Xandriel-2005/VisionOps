@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { History, Loader2, Activity, Settings, RefreshCw, FolderTree, Database } from 'lucide-react';
+import { History, Loader2, Activity, RefreshCw, FolderTree, Database, Save } from 'lucide-react';
 import api from '../api/client';
 import type { RunRecord } from '../types';
 import { StatusChip } from '../components/StatusChip';
+import { Modal } from '../components/Modal';
 
 export function HistoryPage() {
   const [runs, setRuns] = useState<RunRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Model Registration State
+  const [registerModalRunId, setRegisterModalRunId] = useState<number | null>(null);
+  const [registryName, setRegistryName] = useState('');
+  const [registryDesc, setRegistryDesc] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     async function fetchRuns() {
@@ -30,6 +37,26 @@ export function HistoryPage() {
       navigate('/config');
     } catch (err) {
       console.error('Failed to reload config', err);
+    }
+  };
+
+  const handleRegisterSubmit = async () => {
+    if (!registerModalRunId || !registryName.trim()) return;
+    setIsRegistering(true);
+    try {
+      await api.post(`/api/runs/${registerModalRunId}/register`, {
+        registry_name: registryName,
+        description: registryDesc
+      });
+      setRegisterModalRunId(null);
+      setRegistryName('');
+      setRegistryDesc('');
+      alert('Model successfully registered!');
+    } catch (err: any) {
+      console.error('Failed to register model', err);
+      alert('Failed to register model: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -103,6 +130,18 @@ export function HistoryPage() {
                     <td className="p-md flex justify-end gap-sm pr-lg">
                       <button 
                         className="btn btn-outline border-border hover:border-primary/50 text-muted hover:text-primary" 
+                        onClick={() => {
+                          setRegisterModalRunId(run.id);
+                          setRegistryName(run.model_name || '');
+                          setRegistryDesc('');
+                        }}
+                        title="Register Model"
+                        style={{ padding: '8px' }}
+                      >
+                        <Save size={16} />
+                      </button>
+                      <button 
+                        className="btn btn-outline border-border hover:border-primary/50 text-muted hover:text-primary" 
                         onClick={() => handleReloadConfig(run.id)}
                         title="Reload configuration"
                         style={{ padding: '8px' }}
@@ -124,6 +163,55 @@ export function HistoryPage() {
           </div>
         </div>
       )}
+
+      {/* Model Registration Modal */}
+      <Modal 
+        isOpen={registerModalRunId !== null} 
+        onClose={() => setRegisterModalRunId(null)}
+        title="Register Model"
+      >
+        <div className="flex flex-col gap-md">
+          <p className="text-muted text-sm mb-sm">
+            Register this run's model into the MLflow Model Registry. This allows you to manage versions, stage models for production, and serve them.
+          </p>
+          
+          <div className="flex flex-col gap-xs">
+            <label className="text-sm font-semibold text-foreground">Registry Name *</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="e.g. My-Object-Detector"
+              value={registryName}
+              onChange={(e) => setRegistryName(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <label className="text-sm font-semibold text-foreground">Description (Optional)</label>
+            <textarea 
+              className="input-field min-h-[100px]" 
+              placeholder="Describe this version of the model..."
+              value={registryDesc}
+              onChange={(e) => setRegistryDesc(e.target.value)}
+            />
+          </div>
+
+          <div className="flex justify-end gap-sm mt-md">
+            <button className="btn btn-outline" onClick={() => setRegisterModalRunId(null)} disabled={isRegistering}>
+              Cancel
+            </button>
+            <button 
+              className="btn btn-primary" 
+              onClick={handleRegisterSubmit} 
+              disabled={isRegistering || !registryName.trim()}
+            >
+              {isRegistering ? (
+                <span className="flex items-center gap-xs"><Loader2 className="animate-spin" size={16} /> Registering...</span>
+              ) : 'Register Model'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

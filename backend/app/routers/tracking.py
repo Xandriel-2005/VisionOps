@@ -45,6 +45,7 @@ async def get_live_tracking(run_id: int, db: AsyncSession = Depends(get_db)):
     metric_history = {}
     mlflow_run_id = None
     experiment_id = "1" # Assuming default experiment is 1
+    confusion_matrix_url = None
     
     for erun in experiment_runs:
         params_run_id = erun.get("params", {}).get("run_id")
@@ -64,6 +65,13 @@ async def get_live_tracking(run_id: int, db: AsyncSession = Depends(get_db)):
                     
         mlflow_url = f"http://localhost:5000/#/experiments/{experiment_id}/runs/{mlflow_run_id}"
 
+        # Fetch artifacts to see if confusion matrix exists
+        artifacts = await asyncio.to_thread(mlflow_client.get_run_artifacts, mlflow_run_id)
+        for artifact in artifacts:
+            if artifact.endswith("confusion_matrix_normalized.png") or artifact.endswith("confusion_matrix.png"):
+                confusion_matrix_url = f"http://localhost:5000/get-artifact?path={artifact}&run_uuid={mlflow_run_id}"
+                break
+
     return {
         "run_id": run.id,
         "model_name": run.model_name,
@@ -72,7 +80,8 @@ async def get_live_tracking(run_id: int, db: AsyncSession = Depends(get_db)):
         "metric_history": metric_history,
         "airflow_tasks": airflow_tasks,
         "airflow_url": airflow_url,
-        "mlflow_url": mlflow_url
+        "mlflow_url": mlflow_url,
+        "confusion_matrix_url": confusion_matrix_url
     }
 
 @router.get("/{run_id}/tasks/{task_id}/logs")

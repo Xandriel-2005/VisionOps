@@ -210,7 +210,7 @@ with DAG(
         bash_command=f"""
         if [ "{{{{ dag_run.conf.get("run_mode", "local") }}}}" != "remote" ]; then
             echo "Local mode: Skipping remote cleanup."
-            exit 0
+            exit 99
         fi
         
         SSH_CMD='{_ssh_prefix()}'

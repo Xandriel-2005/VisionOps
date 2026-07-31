@@ -64,6 +64,35 @@ export function TrackingPage() {
     return () => clearInterval(interval);
   }, [fetchTracking]);
 
+  const fetchTaskLogs = useCallback(async (taskId: string, isInitial: boolean = false) => {
+    if (isInitial) setIsLogLoading(true);
+    try {
+      const res = await api.get<{log: string}>(`/api/tracking/${runId}/tasks/${taskId}/logs`);
+      setSelectedTaskLog(prev => prev?.taskId === taskId ? { taskId, logs: res.data.log } : prev);
+    } catch (err: any) {
+      if (isInitial) {
+        setSelectedTaskLog(prev => prev?.taskId === taskId ? { 
+          taskId, 
+          logs: err.response?.data?.detail || 'Failed to fetch logs. Task may not have started yet.' 
+        } : prev);
+      }
+    } finally {
+      if (isInitial) setIsLogLoading(false);
+    }
+  }, [runId]);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (selectedTaskLog?.taskId) {
+      interval = setInterval(() => {
+        fetchTaskLogs(selectedTaskLog.taskId, false);
+      }, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [selectedTaskLog?.taskId, fetchTaskLogs]);
+
   if (!runId) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-md">
@@ -84,7 +113,7 @@ export function TrackingPage() {
 
   // Format data for Recharts
   const chartData: any[] = [];
-  if (data?.metric_history) {
+  if (data?.metric_history && Object.keys(data.metric_history).length > 0) {
     // Collect all unique steps across all metrics
     const steps = new Set<number>();
     Object.values(data.metric_history).forEach(history => {
@@ -104,6 +133,19 @@ export function TrackingPage() {
       });
       chartData.push(point);
     });
+  } else if (data?.metrics && Object.keys(data.metrics).length > 0) {
+    // Fallback: If no epoch history, but we have final metrics (e.g. fast run)
+    const finalPoint: any = { step: 'Final' };
+    let hasFinalMetrics = false;
+    Object.entries(data.metrics).forEach(([k, v]) => {
+      if (k.startsWith('final/')) {
+        finalPoint[k.split('/').pop() || k] = v;
+        hasFinalMetrics = true;
+      }
+    });
+    if (hasFinalMetrics) {
+      chartData.push(finalPoint);
+    }
   }
 
   const getTaskIcon = (state: string) => {
@@ -116,20 +158,9 @@ export function TrackingPage() {
     }
   };
 
-  const handleNodeClick = async (taskId: string) => {
+  const handleNodeClick = (taskId: string) => {
     setSelectedTaskLog({ taskId, logs: '' });
-    setIsLogLoading(true);
-    try {
-      const res = await api.get<{log: string}>(`/api/tracking/${runId}/tasks/${taskId}/logs`);
-      setSelectedTaskLog({ taskId, logs: res.data.log });
-    } catch (err: any) {
-      setSelectedTaskLog({ 
-        taskId, 
-        logs: err.response?.data?.detail || 'Failed to fetch logs. Task may not have started yet.' 
-      });
-    } finally {
-      setIsLogLoading(false);
-    }
+    fetchTaskLogs(taskId, true);
   };
 
   const renderDAG = (tasks: AirflowTask[]) => {
@@ -398,9 +429,9 @@ export function TrackingPage() {
             </div>
 
             {/* Current Stats summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+            <div className="flex flex-row flex-wrap gap-md">
               {Object.entries(data.metrics).slice(0, 4).map(([key, value]) => (
-                <div key={key} className="glass-panel p-md rounded-lg border border-border flex flex-col items-center justify-center text-center group hover:bg-surface-raised transition-colors hover:border-primary/30 hover:-translate-y-1 duration-300">
+                <div key={key} className="flex-1 min-w-[120px] glass-panel p-md rounded-lg border border-border flex flex-col items-center justify-center text-center group hover:bg-surface-raised transition-colors hover:border-primary/30 hover:-translate-y-1 duration-300">
                   <p className="text-muted text-sm truncate w-full mb-xs" title={key}>{key.split('/').pop()}</p>
                   <p className="text-xl font-bold font-mono text-foreground">{Number(value).toFixed(4)}</p>
                 </div>
@@ -409,7 +440,7 @@ export function TrackingPage() {
           </div>
 
           {/* Full Width Sidebar Area -> Now Full Width for Landscape Graph */}
-          <div className="lg:col-span-3 flex flex-col gap-lg">
+          <div className="lg:col-span-3 flex flex-col gap-lg mt-md">
             {/* Airflow Tasks Timeline */}
             <div className="card glass-panel hover:border-accent/50 transition-colors p-0 overflow-hidden bg-black border-outline-variant">
               <div className="p-lg border-b border-outline-variant bg-surface-container-highest">

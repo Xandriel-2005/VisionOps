@@ -61,6 +61,42 @@ class TrackingClient:
             print(f"Error fetching runs for experiment {experiment_name}: {e}")
             return []
 
+    def get_run_artifacts(self, run_id: str) -> List[str]:
+        """Gets a list of artifact paths for a run."""
+        try:
+            artifacts = self.client.list_artifacts(run_id)
+            return [a.path for a in artifacts]
+        except Exception as e:
+            print(f"Error fetching artifacts for run {run_id}: {e}")
+            return []
+
+    def register_model(self, run_id: str, registry_name: str, description: str = "") -> Dict[str, Any]:
+        """Registers a model from a specific run to the MLflow Model Registry."""
+        try:
+            # 1. Ensure registered model exists
+            try:
+                self.client.create_registered_model(registry_name)
+            except Exception as e:
+                # Ignore if it already exists
+                pass
+
+            # 2. Resolve source URI explicitly to bypass 'runs:/' resolution endpoint errors
+            run = self.client.get_run(run_id)
+            source_uri = f"{run.info.artifact_uri}/model"
+            
+            # 3. Create version
+            mv = self.client.create_model_version(
+                name=registry_name,
+                source=source_uri,
+                run_id=run_id,
+                description=description
+            )
+            
+            return {"name": mv.name, "version": mv.version}
+        except Exception as e:
+            print(f"Error registering model for run {run_id}: {e}")
+            raise e
+
 # Singleton instance
 mlflow_client = TrackingClient(
     tracking_uri=os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")

@@ -7,6 +7,11 @@ from app.models.run_history import RunHistory
 from app.models.last_config import LastUsedConfig
 from app.schemas.run import RunCreate, RunResponse
 from app.schemas.config import ConfigUpdate
+from pydantic import BaseModel
+
+class RegisterModelRequest(BaseModel):
+    registry_name: str
+    description: str = ""
 from app.services.airflow_client import airflow
 
 router = APIRouter(prefix="/api/runs", tags=["Runs"])
@@ -344,3 +349,36 @@ async def reload_config(run_id: int, db: AsyncSession = Depends(get_db)):
 
     await db.flush()
     return {"detail": "Config reloaded from run", "run_id": run_id}
+
+@router.post("/{run_id}/register", status_code=200)
+async def register_model(run_id: int, payload: RegisterModelRequest, db: AsyncSession = Depends(get_db)):
+    """Registers a run's model to the MLflow model registry."""
+    run = await db.get(RunHistory, run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+        
+    import asyncio
+    from app.services.mlflow_client import mlflow_client
+    experiment_runs = await asyncio.to_thread(mlflow_client.get_experiment_runs)
+    mlflow_run_id = None
+    
+    for erun in experiment_runs:
+        params_run_id = erun.get("params", {}).get("run_id")
+        tags_run_id = erun.get("tags", {}).get("visionops_run_id")
+        if str(run_id) in [params_run_id, tags_run_id]:
+            mlflow_run_id = erun.get("run_id")
+            break
+            
+    if not mlflow_run_id:
+        raise HTTPException(status_code=404, detail="MLflow run not found for this training run.")
+        
+    try:
+        result = await asyncio.to_thread(
+            mlflow_client.register_model, 
+            mlflow_run_id, 
+            payload.registry_name, 
+            payload.description
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")

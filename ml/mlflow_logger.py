@@ -126,9 +126,7 @@ def log_run_results(config: dict, final_metrics: dict, train_time: float, cb: Ep
         for p in saved_plots:
             mlflow.log_artifact(p, artifact_path="metric_curves")
 
-    yolo_out_dir = os.path.join(
-        config["training"]["project"], run_name
-    )
+    yolo_out_dir = os.path.dirname(os.path.dirname(best_pt))
     try:
         if os.path.exists(yolo_out_dir):
             mlflow.log_artifacts(yolo_out_dir, artifact_path="yolo_full_output")
