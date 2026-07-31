@@ -13,6 +13,18 @@ router = APIRouter(prefix="/api/runs", tags=["Runs"])
 
 DAG_ID = "visionops_training"
 
+def _to_airflow_path(host_path: str) -> str:
+    if not host_path:
+        return host_path
+    if host_path.startswith("/opt/airflow"):
+        return host_path
+    parts = host_path.replace("\\", "/").split("/")
+    if "datasets" in parts:
+        idx = parts.index("datasets")
+        return "/opt/airflow/datasets/" + "/".join(parts[idx+1:])
+    return host_path
+
+
 
 @router.post("", response_model=RunResponse, status_code=201)
 async def create_run(payload: RunCreate, db: AsyncSession = Depends(get_db)):
@@ -28,13 +40,13 @@ async def create_run(payload: RunCreate, db: AsyncSession = Depends(get_db)):
         dag_conf = {
             "run_id": run.id,
             "model_name": run.model_name,
-            "dataset_path": run.dataset_path,
+            "dataset_path": _to_airflow_path(run.dataset_path),
             "epochs": run.epochs,
             "batch_size": run.batch_size,
             "learning_rate": run.learning_rate,
             "image_size": run.image_size,
             "use_bg_injection": run.use_bg_injection,
-            "bg_images_path": run.bg_images_path,
+            "bg_images_path": _to_airflow_path(run.bg_images_path),
             "run_mode": run.run_mode,
         }
         
@@ -58,6 +70,7 @@ async def create_run(payload: RunCreate, db: AsyncSession = Depends(get_db)):
         if dag_run_id:
             run.airflow_dag_run_id = dag_run_id
             await db.flush()
+            await db.refresh(run)
     else:
         # Scheduled: dynamic DAG generation
         import os
@@ -118,13 +131,13 @@ dag = DAG(
 # Configuration
 RUN_ID = '{run.id}'
 MODEL_NAME = '{run.model_name}'
-DATASET_PATH = '{run.dataset_path}'
+DATASET_PATH = '{_to_airflow_path(run.dataset_path)}'
 EPOCHS = {run.epochs}
 BATCH_SIZE = {run.batch_size}
 LEARNING_RATE = {run.learning_rate}
 IMAGE_SIZE = {run.image_size}
 USE_BG = {run.use_bg_injection}
-BG_PATH = '{run.bg_images_path or ""}'
+BG_PATH = '{_to_airflow_path(run.bg_images_path)}'
 RUN_MODE = '{run.run_mode}'
 {gpu_vars}
 
@@ -133,7 +146,7 @@ prev_task = None
 if USE_BG and BG_PATH:
     inject_bg = BashOperator(
         task_id='inject_bg_images',
-        bash_command=f"python /opt/airflow/inject_background.py inject --source_dir '{{BG_PATH}}' --dataset_path '{{DATASET_PATH}}'",
+        bash_command=f"python /opt/airflow/ml/inject_background.py inject --source_dir '{{BG_PATH}}' --dataset_path '{{DATASET_PATH}}'",
         dag=dag,
     )
     prev_task = inject_bg
@@ -147,11 +160,10 @@ if RUN_MODE == 'remote':
     sync_to_gpu = BashOperator(
         task_id='sync_to_gpu',
         bash_command=f\"\"\"
-        $ssh_cmd "mkdir -p {{workspace}}/detectors {{workspace}}/datasets"
-        $scp_cmd /opt/airflow/train.py {{remote}}:{{workspace}}/
-        $scp_cmd -r /opt/airflow/detectors/* {{remote}}:{{workspace}}/detectors/
+        $ssh_cmd "mkdir -p {{workspace}}/datasets"
+        $scp_cmd -r /opt/airflow/ml {{remote}}:{{workspace}}/
         $scp_cmd -r '{{DATASET_PATH}}' {{remote}}:{{workspace}}/datasets/
-        $scp_cmd /opt/airflow/inject_background.py {{remote}}:{{workspace}}/ || true
+        $scp_cmd /opt/airflow/ml/inject_background.py {{remote}}:{{workspace}}/ || true
         if [ "{{USE_BG}}" = "True" ] && [ -n "{{BG_PATH}}" ]; then
             $scp_cmd -r '{{BG_PATH}}' {{remote}}:{{workspace}}/bg_images/
         fi
@@ -168,7 +180,7 @@ if RUN_MODE == 'remote':
             ACTIVATE_CMD="source {{GPU_VENV}}/bin/activate && "
         fi
         
-        $ssh_cmd "cd {{workspace}} && $ACTIVATE_CMD python train.py \\
+        $ssh_cmd "cd {{workspace}} && $ACTIVATE_CMD python ml/train.py \\
           --model-name '{{MODEL_NAME}}' \\
           --dataset-path {{workspace}}/datasets/{{dataset_name}} \\
           --epochs {{EPOCHS}} \\
@@ -217,7 +229,7 @@ else:
         auto_remove='force',
         mount_tmp_dir=False,
         command=f\"\"\"
-        python /app/train.py \\
+        python /app/ml/train.py \\
           --model-name '{{MODEL_NAME}}' \\
           --dataset-path '{{DATASET_PATH}}' \\
           --epochs {{EPOCHS}} \\
@@ -227,13 +239,12 @@ else:
           --run-id '{{RUN_ID}}'
         \"\"\",
         docker_url='unix://var/run/docker.sock',
-        network_mode='bridge',
+        network_mode='visionops_visionops',
         mounts=[
-            Mount(source=f'{{HOST_PROJECT_ROOT}}/train.py', target='/app/train.py', type='bind', read_only=True),
-            Mount(source=f'{{HOST_PROJECT_ROOT}}/detectors', target='/app/detectors', type='bind', read_only=True),
+            Mount(source=f'{{HOST_PROJECT_ROOT}}/ml', target='/app/ml', type='bind', read_only=True),
             Mount(source=f'{{HOST_PROJECT_ROOT}}/datasets', target='/opt/airflow/datasets', type='bind')
         ],
-        environment={{'MLFLOW_TRACKING_URI': 'http://host.docker.internal:5000'}},
+        environment={{'MLFLOW_TRACKING_URI': 'http://mlflow:5000'}},
         dag=dag,
     )
     if prev_task:
@@ -243,7 +254,7 @@ else:
 # Cleanup local injected images
 cleanup_bg = BashOperator(
     task_id='cleanup_bg_images',
-    bash_command=f"python /opt/airflow/inject_background.py cleanup --dataset_path '{{DATASET_PATH}}'",
+    bash_command=f"python /opt/airflow/ml/inject_background.py cleanup --dataset_path '{{DATASET_PATH}}'",
     trigger_rule='all_done',
     dag=dag,
 )

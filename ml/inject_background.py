@@ -8,16 +8,27 @@ MANIFEST_FILE = ".injected_manifest.txt"
 
 def _resolve_train_images_dir(dataset_path: str) -> str:
     """Find the train/images directory from a YOLO dataset path."""
-    # Try data.yaml first, then fall back to common names
-    for yaml_name in ("data.yaml", "dataset.yaml"):
-        yaml_path = os.path.join(dataset_path, yaml_name)
-        if os.path.exists(yaml_path):
-            with open(yaml_path) as f:
-                cfg = yaml.safe_load(f)
-            train_val = str(cfg.get("train", "train/images"))
-            if os.path.isabs(train_val):
-                return train_val
-            return os.path.normpath(os.path.join(dataset_path, train_val))
+    
+    if dataset_path.endswith(".yaml") or dataset_path.endswith(".yml"):
+        yaml_path = dataset_path
+        dataset_path = os.path.dirname(yaml_path)
+    else:
+        yaml_path = None
+        for name in ("data.yaml", "dataset.yaml"):
+            p = os.path.join(dataset_path, name)
+            if os.path.exists(p):
+                yaml_path = p
+                break
+
+    if yaml_path and os.path.exists(yaml_path):
+        with open(yaml_path) as f:
+            cfg = yaml.safe_load(f)
+        train_val = str(cfg.get("train", "train/images"))
+        if os.path.isabs(train_val):
+            return train_val
+        if train_val.startswith("../"):
+            train_val = train_val[3:]
+        return os.path.normpath(os.path.join(dataset_path, train_val))
 
     # Fallback: look for common directory structures
     for candidate in ("train/images", "images/train"):

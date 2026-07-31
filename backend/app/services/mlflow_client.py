@@ -27,6 +27,15 @@ class TrackingClient:
             print(f"Error fetching MLflow params for {run_id}: {e}")
             return {}
             
+    def get_metric_history(self, run_id: str, metric_key: str) -> List[Dict[str, Any]]:
+        """Fetches the history of a specific metric for a run."""
+        try:
+            history = self.client.get_metric_history(run_id, metric_key)
+            return [{"step": m.step, "value": m.value, "timestamp": m.timestamp} for m in history]
+        except Exception as e:
+            print(f"Error fetching metric history {metric_key} for {run_id}: {e}")
+            return []
+            
     def get_experiment_runs(self, experiment_name: str = "visionops_training") -> List[Dict[str, Any]]:
         """Gets recent runs for an experiment."""
         try:
@@ -43,6 +52,7 @@ class TrackingClient:
                     "status": run.info.status,
                     "metrics": run.data.metrics,
                     "params": run.data.params,
+                    "tags": run.data.tags,
                     "start_time": run.info.start_time,
                     "end_time": run.info.end_time
                 })

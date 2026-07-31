@@ -3,33 +3,30 @@ import shutil
 import sys
 import os
 
-# Add repo root to sys.path so we can import detectors module
+# Add repo root to sys.path so we can import ml module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
-from detectors.registry import registry
+from ml import model_registry
 
 router = APIRouter(prefix="/api/models", tags=["Models"])
 
 @router.get("")
 async def list_models():
-    models = list(registry.get_available_models())
+    models = []
     
     weights_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../models/weights"))
     if os.path.exists(weights_dir):
-        registry_names = {m["name"] for m in models}
         for file in os.listdir(weights_dir):
-            if file.endswith(".pt"):
-                name = file[:-3]
-                if name not in registry_names:
-                    models.append({
-                        "name": name,
-                        "display_name": f"{file} (Custom Weights)",
-                        "description": "Custom trained or uploaded weights.",
-                        "parameters": "?",
-                        "speed": "?",
-                        "accuracy": "?",
-                        "status": "ready",
-                        "architecture": "Custom"
-                    })
+            if file.endswith(".pt") or file.endswith(".onnx") or file.endswith(".tflite") or file.endswith(".safetensors"):
+                models.append({
+                    "name": file,
+                    "display_name": file,
+                    "description": "Local weights file.",
+                    "parameters": "?",
+                    "speed": "?",
+                    "accuracy": "?",
+                    "status": "ready",
+                    "architecture": "Custom"
+                })
     return models
 
 @router.post("/upload")

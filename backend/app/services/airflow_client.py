@@ -52,6 +52,41 @@ class AirflowClient:
                 print(f"Error fetching DAG status: {str(e)}")
             return None
 
+    async def get_dag_run_tasks(self, dag_id: str, dag_run_id: str) -> list[Dict[str, Any]]:
+        """Gets the list of task instances and their statuses for a specific DAG run."""
+        url = f"{self.base_url}/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, headers=self.headers, timeout=5.0)
+                if response.status_code == 200:
+                    return response.json().get("task_instances", [])
+            except Exception as e:
+                print(f"Error fetching DAG task instances: {str(e)}")
+            return []
+
+    async def get_task_log(self, dag_id: str, dag_run_id: str, task_id: str, try_number: int = 1) -> Optional[str]:
+        """Gets the logs for a specific task instance."""
+        # The Airflow REST API endpoint for logs returns text directly or a JSON object with 'content' depending on Airflow version/config.
+        url = f"{self.base_url}/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{try_number}"
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                # Accept text/plain according to Airflow API docs
+                headers = {**self.headers, "Accept": "text/plain"}
+                response = await client.get(url, headers=headers, timeout=5.0)
+                if response.status_code == 200:
+                    # In some versions, the response is plain text. In others, it might be JSON if Accept header isn't honored.
+                    if 'application/json' in response.headers.get('content-type', ''):
+                        data = response.json()
+                        return data.get("content", "")
+                    return response.text
+                else:
+                    print(f"Failed to fetch task log: {response.status_code}")
+            except Exception as e:
+                print(f"Error fetching task log for {task_id}: {str(e)}")
+            return None
+
 # Singleton instance for the app to use
 airflow = AirflowClient(
     base_url=os.getenv("AIRFLOW_API_URL", "http://localhost:8080/api/v1"),

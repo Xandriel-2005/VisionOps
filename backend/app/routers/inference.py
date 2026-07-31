@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from detectors.registry import registry
+from ml import model_registry
 
 router = APIRouter(prefix="/api/inference", tags=["Inference"])
 
@@ -38,7 +38,9 @@ async def run_inference(
     try:
         # Get detector
         try:
-            detector = registry.get_detector(model_name)
+            # Default to ultralytics_detector if architecture isn't explicitly known.
+            # In VisionOps, model_name often passes weights like yolov8n.pt from UI.
+            detector = model_registry.get_detector("ultralytics_detector")
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
             

@@ -579,3 +579,93 @@ a:hover {
 .w-full { width: 100%; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md); }
+
+/* Additional Tailwind-like utilities */
+.flex-wrap { flex-wrap: wrap; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-hidden { overflow: hidden; }
+.fixed { position: fixed; }
+.absolute { position: absolute; }
+.relative { position: relative; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.top-0 { top: 0; }
+.left-0 { left: 0; }
+.bottom-0 { bottom: 0; }
+.-top-1 { top: -4px; }
+.-right-1 { right: -4px; }
+.left-1\/2 { left: 50%; }
+.-translate-x-1\/2 { transform: translateX(-50%); }
+.translate-y-1\/2 { transform: translateY(50%); }
+.rotate-45 { transform: rotate(45deg); }
+.z-0 { z-index: 0; }
+.z-10 { z-index: 10; }
+.z-\[100\] { z-index: 100; }
+.bg-black\/60 { background-color: rgba(0,0,0,0.6); }
+.backdrop-blur-sm { backdrop-filter: blur(4px); }
+.max-w-4xl { max-width: 56rem; }
+.max-w-\[150px\] { max-width: 150px; }
+.max-h-\[90vh\] { max-height: 90vh; }
+.w-2 { width: 0.5rem; }
+.h-2 { height: 0.5rem; }
+.w-3 { width: 0.75rem; }
+.h-3 { height: 0.75rem; }
+.h-6 { height: 1.5rem; }
+.w-px { width: 1px; }
+.px-md { padding-left: var(--space-md); padding-right: var(--space-md); }
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.py-md { padding-top: var(--space-md); padding-bottom: var(--space-md); }
+.py-xl { padding-top: var(--space-xl); padding-bottom: var(--space-xl); }
+.rounded-lg { border-radius: 8px; }
+.rounded-xl { border-radius: 12px; }
+.rounded-full { border-radius: 9999px; }
+.border-2 { border-width: 2px; border-style: solid; }
+.border-b-2 { border-bottom-width: 2px; border-style: solid; }
+.border-r-2 { border-right-width: 2px; border-style: solid; }
+.border-border { border-color: var(--outline); }
+.border-primary { border-color: var(--primary); }
+.border-success { border-color: var(--status-success); }
+.border-error { border-color: var(--status-failed); }
+.border-outline-variant { border-color: var(--outline-variant); }
+.bg-primary { background-color: var(--primary); }
+.bg-primary\/10 { background-color: rgba(0, 240, 255, 0.1); }
+.bg-success\/5 { background-color: rgba(0, 255, 102, 0.05); }
+.bg-error\/10 { background-color: rgba(255, 34, 68, 0.1); }
+.bg-surface-raised { background-color: var(--surface-container-high); }
+.hover\:bg-success\/10:hover { background-color: rgba(0, 255, 102, 0.1); }
+.hover\:bg-error\/20:hover { background-color: rgba(255, 34, 68, 0.2); }
+.hover\:border-primary\/50:hover { border-color: rgba(0, 240, 255, 0.5); }
+.hover\:opacity-100:hover { opacity: 1; }
+.opacity-70 { opacity: 0.7; }
+.shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.shadow-primary\/30 { box-shadow: 0 4px 6px -1px rgba(0, 240, 255, 0.3); }
+.transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+.animate-pulse-border { animation: pulse-border 1.5s infinite; }
+.animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.flex-row { flex-direction: row; }
+.px-lg { padding-left: var(--space-lg); padding-right: var(--space-lg); }
+.shrink-0 { flex-shrink: 0; }
+.min-h-\[250px\] { min-height: 250px; }
+.w-\[220px\] { width: 220px; }
+.w-12 { width: 3rem; }
+.mx-sm { margin-left: var(--space-sm); margin-right: var(--space-sm); }
+.bg-\[\#001122\] { background-color: #001122; }
+.bg-\[\#002211\] { background-color: #002211; }
+.bg-\[\#220000\] { background-color: #220000; }
+.hover\:bg-\[\#330000\]:hover { background-color: #330000; }
+.hover\:bg-\[\#00331a\]:hover { background-color: #00331a; }
+.shadow-\[0_0_15px_rgba\(0\,240\,255\,0\.4\)\] { box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+.border-outline { border-color: var(--outline); }
+.bg-surface-dim { background-color: var(--surface-dim); }
+.p-0 { padding: 0; }
+.border-t-2 { border-top-width: 2px; border-style: solid; }
+.bg-surface-container-highest { background-color: var(--surface-container-highest); }
+.max-h-\[65vh\] { max-height: 65vh; }
+.min-w-max { min-width: max-content; }
+.overflow-auto { overflow: auto; }
+.bg-black { background-color: black; }
+.pointer-events-none { pointer-events: none; }

@@ -1,6 +1,6 @@
 import argparse
 import json
-from detectors.registry import registry
+from ml import model_registry
 
 
 def parse_args():
@@ -17,8 +17,9 @@ def main():
     args = parse_args()
     
     print(f"Loading {args.model_name} from {args.weights_path}...")
-    detector = registry.get_detector(args.model_name)
-    detector.load(weights_path=args.weights_path)
+    # Default to ultralytics_detector architecture
+    detector = model_registry.get_detector("ultralytics_detector")
+    detector.load(weights=args.weights_path)
     
     print(f"Running inference on {args.source}...")
     detections = detector.infer(source_path=args.source, conf_threshold=args.conf)

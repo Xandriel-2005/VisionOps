@@ -67,7 +67,7 @@ with DAG(
     inject_bg = BashOperator(
         task_id='inject_bg_images',
         bash_command="""
-        python /opt/airflow/inject_background.py inject \
+        python /opt/airflow/ml/inject_background.py inject \
           --source_dir '{{ dag_run.conf.get("bg_images_path", "") }}' \
           --dataset_path '{{ dag_run.conf.get("dataset_path", "") }}'
         """,
@@ -105,7 +105,7 @@ with DAG(
         auto_remove='force',
         mount_tmp_dir=False,
         command=f"""
-        python /app/train.py \
+        python -m ml.train \
           --model-name '{{{{ dag_run.conf.get("model_name") }}}}' \
           --dataset-path '{{{{ dag_run.conf.get("dataset_path") }}}}' \
           --epochs {{{{ dag_run.conf.get("epochs", 1) }}}} \
@@ -115,14 +115,16 @@ with DAG(
           --run-id '{{{{ dag_run.conf.get("run_id", "local_run") }}}}'
         """,
         docker_url='unix://var/run/docker.sock',
-        network_mode='bridge',
+        network_mode='visionops_visionops',
         mounts=[
-            Mount(source=f'{HOST_PROJECT_ROOT}/train.py', target='/app/train.py', type='bind', read_only=True),
-            Mount(source=f'{HOST_PROJECT_ROOT}/detectors', target='/app/detectors', type='bind', read_only=True),
-            Mount(source=f'{HOST_PROJECT_ROOT}/datasets', target='/opt/airflow/datasets', type='bind')
+            Mount(source=f'{HOST_PROJECT_ROOT}/ml', target='/app/ml', type='bind', read_only=True),
+            Mount(source=f'{HOST_PROJECT_ROOT}/datasets', target='/opt/airflow/datasets', type='bind'),
+            Mount(source=f'{HOST_PROJECT_ROOT}/models', target='/opt/airflow/models', type='bind'),
+            Mount(source=f'{HOST_PROJECT_ROOT}/runs', target='/app/runs', type='bind')
         ],
         environment={
-            'MLFLOW_TRACKING_URI': 'http://host.docker.internal:5000'
+            'MLFLOW_TRACKING_URI': 'http://mlflow:5000',
+            'GIT_PYTHON_REFRESH': 'quiet'
         }
     )
 
@@ -146,7 +148,7 @@ with DAG(
         $SCP_CMD -r '{{{{ dag_run.conf.get("dataset_path", "") }}}}' $REMOTE:$WORKSPACE/datasets/
 
         # Sync inject script and BG images if needed
-        $SCP_CMD /opt/airflow/inject_background.py $REMOTE:$WORKSPACE/ || true
+        $SCP_CMD /opt/airflow/ml/inject_background.py $REMOTE:$WORKSPACE/ || true
         if [ "{{{{ dag_run.conf.get("use_bg_injection", false) }}}}" = "True" ] && [ -n "{{{{ dag_run.conf.get("bg_images_path", "") }}}}" ]; then
             $SCP_CMD -r '{{{{ dag_run.conf.get("bg_images_path", "") }}}}' $REMOTE:$WORKSPACE/bg_images/
         fi
@@ -229,7 +231,7 @@ with DAG(
     cleanup_bg = BashOperator(
         task_id='cleanup_bg_images',
         bash_command="""
-        python /opt/airflow/inject_background.py cleanup \
+        python /opt/airflow/ml/inject_background.py cleanup \
           --dataset_path '{{ dag_run.conf.get("dataset_path", "") }}'
         """,
         trigger_rule='all_done',
