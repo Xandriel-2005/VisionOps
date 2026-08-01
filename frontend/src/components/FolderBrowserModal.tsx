@@ -53,7 +53,7 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
     <div className="modal-overlay">
       <div className="modal" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
         <div className="modal-header">
-          <h2 className="modal-title flex items-center gap-sm">
+          <h2 className="modal-title flex items-center gap-2">
             <Folder size={20} style={{ color: 'var(--primary)' }} /> Select Dataset Folder
           </h2>
           <button onClick={onClose} className="btn btn-ghost btn-icon">
@@ -61,11 +61,11 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
           </button>
         </div>
         
-        <div className="modal-body flex flex-col gap-md" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 'var(--space-md)' }}>
+        <div className="modal-body flex flex-col gap-4" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: 'var(--space-md)' }}>
           {/* Path input bar - pinned at top */}
           <form 
             onSubmit={handleInputSubmit}
-            className="flex items-center gap-sm p-sm" 
+            className="flex items-center gap-2 p-sm" 
             style={{ 
               backgroundColor: 'var(--surface-container-lowest)', 
               border: '1px solid var(--outline)',
@@ -86,7 +86,7 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
           </form>
 
           {error && (
-            <div className="p-sm text-error text-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--error) 20%, transparent)', flexShrink: 0 }}>
+            <div className="p-sm text-status-failed text-sm" style={{ backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--error) 20%, transparent)', flexShrink: 0 }}>
               {error}
             </div>
           )}
@@ -94,7 +94,7 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
           {/* Directory list - scrolls independently */}
           <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--outline)', backgroundColor: 'var(--surface-container-low)', minHeight: '0' }}>
             {loading ? (
-              <div className="flex items-center justify-center text-muted" style={{ height: '100%', padding: 'var(--space-lg)' }}>
+              <div className="flex items-center justify-center text-on-surface-variant" style={{ height: '100%', padding: 'var(--space-lg)' }}>
                 <div className="status-chip running"><div className="status-dot"></div> Loading folders...</div>
               </div>
             ) : (
@@ -102,11 +102,11 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
                 {parentPath && (
                   <li>
                     <button 
-                      className="flex items-center gap-sm nav-item"
+                      className="flex items-center gap-2 nav-item"
                       onClick={() => loadDirectory(parentPath)}
                       style={{ padding: 'var(--space-sm) var(--space-md)', borderBottom: '1px solid var(--outline-variant)' }}
                     >
-                      <ArrowUp size={16} className="text-muted" />
+                      <ArrowUp size={16} className="text-on-surface-variant" />
                       <span className="mono-data">..</span>
                     </button>
                   </li>
@@ -117,7 +117,7 @@ export function FolderBrowserModal({ onClose, onSelect }: FolderBrowserModalProp
                 {directories.map((dir) => (
                   <li key={dir}>
                     <button 
-                      className="flex items-center gap-sm nav-item"
+                      className="flex items-center gap-2 nav-item"
                       onClick={() => loadDirectory(getNextPath(dir))}
                       style={{ padding: 'var(--space-sm) var(--space-md)', borderBottom: '1px solid var(--outline-variant)' }}
                     >

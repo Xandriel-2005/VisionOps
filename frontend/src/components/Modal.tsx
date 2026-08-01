@@ -41,7 +41,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           <h2 className="title-lg font-bold text-foreground">{title}</h2>
           <button 
             onClick={onClose}
-            className="p-sm rounded-full hover:bg-surface-raised transition-colors text-muted hover:text-foreground"
+            className="p-sm rounded-full hover:bg-surface-raised transition-colors text-on-surface-variant hover:text-foreground"
           >
             <X size={20} />
           </button>

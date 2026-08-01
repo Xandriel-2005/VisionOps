@@ -95,8 +95,8 @@ export function TrackingPage() {
 
   if (!runId) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-md">
-        <p className="text-muted">No run ID specified.</p>
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <p className="text-on-surface-variant">No run ID specified.</p>
         <button className="btn btn-primary" onClick={() => navigate('/history')}>Go to Run History</button>
       </div>
     );
@@ -104,9 +104,9 @@ export function TrackingPage() {
 
   if (loading && !data) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-md" style={{ minHeight: '60vh' }}>
+      <div className="flex flex-col items-center justify-center h-full gap-4" style={{ minHeight: '60vh' }}>
         <Loader2 className="animate-spin text-primary" size={48} />
-        <p className="text-muted animate-pulse">Establishing connection...</p>
+        <p className="text-on-surface-variant animate-pulse">Establishing connection...</p>
       </div>
     );
   }
@@ -152,9 +152,9 @@ export function TrackingPage() {
     switch (state) {
       case 'success': return <CheckCircle2 className="text-success" size={20} />;
       case 'running': return <Loader2 className="animate-spin text-primary" size={20} />;
-      case 'failed': return <AlertCircle className="text-error" size={20} />;
+      case 'failed': return <AlertCircle className="text-status-failed" size={20} />;
       case 'queued': return <Clock className="text-warning" size={20} />;
-      default: return <Circle className="text-muted" size={20} />;
+      default: return <Circle className="text-on-surface-variant" size={20} />;
     }
   };
 
@@ -294,7 +294,7 @@ export function TrackingPage() {
                   height: `${NODE_HEIGHT}px`
                 }}
                 className={`
-                  z-10 flex items-center gap-sm px-md py-sm rounded-lg border-2 shadow-sm transition-all
+                  z-10 flex items-center gap-2 px-4 py-2 rounded-lg border-2 shadow-sm transition-all
                   ${isRunning ? 'border-primary bg-[#001122] shadow-[0_0_15px_rgba(0,240,255,0.4)] animate-pulse-border' : ''}
                   ${isSuccess ? 'border-success bg-[#002211] hover:bg-[#00331a]' : ''}
                   ${isFailed ? 'border-error bg-[#220000] hover:bg-[#330000]' : ''}
@@ -309,7 +309,7 @@ export function TrackingPage() {
                   <span className="text-sm font-medium text-foreground truncate w-full" title={id}>
                     {id}
                   </span>
-                  <span className="text-[10px] text-muted capitalize">{pos.state === 'none' ? 'pending' : pos.state}</span>
+                  <span className="text-[10px] text-on-surface-variant capitalize">{pos.state === 'none' ? 'pending' : pos.state}</span>
                 </div>
               </button>
             );
@@ -326,27 +326,27 @@ export function TrackingPage() {
       <div className="page-header flex justify-between items-start glass-panel p-lg rounded-xl mb-xl">
         <div>
           <button
-            className="btn btn-ghost mb-md p-0 flex items-center gap-xs hover:text-primary transition-colors"
-            style={{ minWidth: 'auto', minHeight: 'auto', color: 'var(--text-muted)' }}
+            className="btn btn-ghost mb-4 p-0 flex items-center gap-1 hover:text-primary transition-colors"
+            style={{ minWidth: 'auto', minHeight: 'auto', color: 'var(--text-on-surface-variant)' }}
             onClick={() => navigate('/history')}
           >
             <ArrowLeft size={16} /> Back to History
           </button>
-          <h1 className="text-gradient font-bold text-4xl mb-xs">Run #{runId} Tracking</h1>
-          <p className="text-muted flex items-center gap-sm">
+          <h1 className="text-gradient font-bold text-4xl mb-1">Run #{runId} Tracking</h1>
+          <p className="text-on-surface-variant flex items-center gap-2">
             Model: <span className="text-foreground font-mono">{data?.model_name || 'Loading...'}</span>
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-md">
+        <div className="flex flex-col items-end gap-4">
           {data && <StatusChip status={data.status} />}
-          <div className="flex gap-sm">
+          <div className="flex gap-2">
             {data?.airflow_url && (
               <a
                 href={data.airflow_url}
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-outline flex items-center gap-xs hover:border-primary hover:text-primary transition-all shadow-sm hover:shadow-primary/20"
+                className="btn btn-outline flex items-center gap-1 hover:border-primary hover:text-primary transition-all shadow-sm hover:shadow-primary/20"
               >
                 <Terminal size={16} /> Airflow
                 <ExternalLink size={14} className="ml-xs" />
@@ -357,7 +357,7 @@ export function TrackingPage() {
                 href={data.mlflow_url}
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-primary flex items-center gap-xs shadow-lg shadow-primary/30"
+                className="btn btn-primary flex items-center gap-1 shadow-lg shadow-primary/30"
               >
                 <Activity size={16} /> MLflow
                 <ExternalLink size={14} className="ml-xs" />
@@ -368,25 +368,25 @@ export function TrackingPage() {
       </div>
 
       {error && (
-        <div className="mb-lg p-md rounded-lg bg-error/10 border border-error/30 text-error flex items-center gap-sm shadow-inner">
+        <div className="mb-6 p-md rounded-lg bg-error/10 border border-error/30 text-status-failed flex items-center gap-2 shadow-inner">
           <AlertCircle size={20} />
           {error}
         </div>
       )}
 
       {data && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Chart Area */}
-          <div className="lg:col-span-2 flex flex-col gap-lg">
+          <div className="lg:col-span-2 flex flex-col gap-6">
             <div className="card glass-panel relative overflow-hidden group hover:border-primary/50 transition-colors">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50 group-hover:opacity-100 transition-opacity" />
-              <h3 className="headline-sm mb-lg flex items-center gap-sm">
+              <h3 className="headline-sm mb-6 flex items-center gap-2">
                 <Activity className="text-primary" size={22} /> Training Metrics
               </h3>
 
               {chartData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-xl text-muted h-[350px] bg-surface-raised/30 rounded-lg border border-dashed border-border">
-                  <Activity className="animate-pulse mb-sm opacity-50" size={48} />
+                <div className="flex flex-col items-center justify-center py-10 text-on-surface-variant h-[350px] bg-surface-raised/30 rounded-lg border border-dashed border-border">
+                  <Activity className="animate-pulse mb-2 opacity-50" size={48} />
                   <p>Awaiting metric telemetry...</p>
                 </div>
               ) : (
@@ -394,8 +394,8 @@ export function TrackingPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                      <XAxis dataKey="step" stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)' }} />
-                      <YAxis stroke="var(--text-muted)" tick={{ fill: 'var(--text-muted)' }} />
+                      <XAxis dataKey="step" stroke="var(--text-on-surface-variant)" tick={{ fill: 'var(--text-on-surface-variant)' }} />
+                      <YAxis stroke="var(--text-on-surface-variant)" tick={{ fill: 'var(--text-on-surface-variant)' }} />
                       <RechartsTooltip
                         contentStyle={{
                           backgroundColor: 'var(--surface-raised)',
@@ -429,10 +429,10 @@ export function TrackingPage() {
             </div>
 
             {/* Current Stats summary */}
-            <div className="flex flex-row flex-wrap gap-md">
+            <div className="flex flex-row flex-wrap gap-4">
               {Object.entries(data.metrics).slice(0, 4).map(([key, value]) => (
                 <div key={key} className="flex-1 min-w-[120px] glass-panel p-md rounded-lg border border-border flex flex-col items-center justify-center text-center group hover:bg-surface-raised transition-colors hover:border-primary/30 hover:-translate-y-1 duration-300">
-                  <p className="text-muted text-sm truncate w-full mb-xs" title={key}>{key.split('/').pop()}</p>
+                  <p className="text-on-surface-variant text-sm truncate w-full mb-1" title={key}>{key.split('/').pop()}</p>
                   <p className="text-xl font-bold font-mono text-foreground">{Number(value).toFixed(4)}</p>
                 </div>
               ))}
@@ -440,11 +440,11 @@ export function TrackingPage() {
           </div>
 
           {/* Full Width Sidebar Area -> Now Full Width for Landscape Graph */}
-          <div className="lg:col-span-3 flex flex-col gap-lg mt-md">
+          <div className="lg:col-span-3 flex flex-col gap-6 mt-4">
             {/* Airflow Tasks Timeline */}
             <div className="card glass-panel hover:border-accent/50 transition-colors p-0 overflow-hidden bg-black border-outline-variant">
               <div className="p-lg border-b border-outline-variant bg-surface-container-highest">
-                <h3 className="headline-sm flex items-center gap-sm">
+                <h3 className="headline-sm flex items-center gap-2">
                   <Terminal className="text-accent" size={22} /> Execution Trace
                 </h3>
               </div>
@@ -452,8 +452,8 @@ export function TrackingPage() {
               {data.airflow_tasks && data.airflow_tasks.length > 0 ? (
                 renderDAG(data.airflow_tasks)
               ) : (
-                <div className="flex flex-col items-center justify-center py-xl text-muted bg-surface-raised/20 rounded-lg">
-                  <Clock className="animate-spin-slow mb-sm opacity-40" size={32} />
+                <div className="flex flex-col items-center justify-center py-10 text-on-surface-variant bg-surface-raised/20 rounded-lg">
+                  <Clock className="animate-spin-slow mb-2 opacity-40" size={32} />
                   <p className="text-sm text-center">Tracing pipeline<br />execution states...</p>
                 </div>
               )}
@@ -468,9 +468,9 @@ export function TrackingPage() {
         title={selectedTaskLog ? `Logs: ${selectedTaskLog.taskId}` : 'Logs'}
       >
         {isLogLoading ? (
-          <div className="flex flex-col items-center justify-center py-xl">
-            <Loader2 className="animate-spin text-primary mb-sm" size={32} />
-            <p className="text-muted">Fetching logs from Airflow...</p>
+          <div className="flex flex-col items-center justify-center py-10">
+            <Loader2 className="animate-spin text-primary mb-2" size={32} />
+            <p className="text-on-surface-variant">Fetching logs from Airflow...</p>
           </div>
         ) : (
           <div className="bg-[#1e1e1e] rounded-lg overflow-auto max-h-[65vh] border border-outline-variant">

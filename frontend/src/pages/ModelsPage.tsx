@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Cpu, Search, Filter, Loader2, Upload, Plus, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Cpu, Search, Filter, Loader2, Upload, ArrowRight, ArrowLeft } from 'lucide-react';
 import api from '../api/client';
 import type { ModelInfo } from '../types';
 
@@ -79,10 +79,10 @@ export function ModelsPage() {
   if (!detector) {
     return (
       <div>
-        <div className="page-header flex justify-between items-center mb-lg">
+        <div className="page-header flex justify-between items-center mb-6">
           <div>
             <h1>Select Detector Architecture</h1>
-            <p className="body-md text-muted mt-sm">Choose the underlying machine learning framework for your task.</p>
+            <p className="body-md text-on-surface-variant mt-2">Choose the underlying machine learning framework for your task.</p>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export function ModelsPage() {
               <Cpu size={32} className="text-primary" />
             </div>
             <h2 className="headline-md">Ultralytics YOLO</h2>
-            <p className="body-md text-muted">
+            <p className="body-md text-on-surface-variant">
               Optimized for fast, real-time object detection models like YOLOv8, YOLOv10, and RT-DETR. Ideal for edge devices and high-speed inference.
             </p>
             <button className="btn btn-primary mt-auto">Select Ultralytics <ArrowRight size={16} /></button>
@@ -111,7 +111,7 @@ export function ModelsPage() {
               <Cpu size={32} className="text-primary" />
             </div>
             <h2 className="headline-md">Hugging Face Transformers</h2>
-            <p className="body-md text-muted">
+            <p className="body-md text-on-surface-variant">
               Provides access to a vast ecosystem of transformer-based models (e.g., DETR, OwlViT) and community weights. Best for state-of-the-art accuracy and research.
             </p>
             <button className="btn btn-primary mt-auto">Select Hugging Face <ArrowRight size={16} /></button>
@@ -124,24 +124,25 @@ export function ModelsPage() {
   return (
     <div>
       <div className="page-header flex justify-between items-center">
-        <div className="flex gap-md items-center">
+        <div className="flex gap-4 items-center">
           <button className="btn-icon btn-ghost" onClick={() => { setDetector(null); setSelectedModel(null); setHfModelId(''); }}>
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1>Models ({detector === 'ultralytics' ? 'Ultralytics' : 'Hugging Face'})</h1>
-            <p className="body-md text-muted mt-sm">Select or provide weights for the selected architecture.</p>
+            <p className="body-md text-on-surface-variant mt-2">Select or provide weights for the selected architecture.</p>
           </div>
         </div>
-        <button className="btn btn-primary">
-          <Plus size={16} /> Register New Model
+        <button className="btn btn-secondary" onClick={fetchModels}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Refresh Models
         </button>
       </div>
 
       {detector === 'huggingface' ? (
-        <div className="card mb-lg" style={{ padding: 'var(--space-xl)' }}>
-          <h2 className="headline-sm mb-md">Hugging Face Hub Model</h2>
-          <p className="body-md text-muted mb-lg">Enter the ID of a Hugging Face model repository (e.g., <code>facebook/detr-resnet-50</code>).</p>
+        <div className="card mb-6" style={{ padding: 'var(--space-xl)' }}>
+          <h2 className="headline-sm mb-4">Hugging Face Hub Model</h2>
+          <p className="body-md text-on-surface-variant mb-6">Enter the ID of a Hugging Face model repository (e.g., <code>facebook/detr-resnet-50</code>).</p>
           <input 
             type="text" 
             className="form-input w-full" 
@@ -152,13 +153,13 @@ export function ModelsPage() {
         </div>
       ) : (
         <>
-          <div className="card mb-lg" style={{ padding: 'var(--space-sm)' }}>
-            <div className="flex items-center gap-md" style={{ flexWrap: 'wrap' }}>
-              <div className="flex items-center gap-xs flex-1" style={{ minWidth: '200px', borderRight: '1px solid var(--outline)', paddingRight: 'var(--space-sm)' }}>
-                <Search size={16} className="text-muted" />
+          <div className="card mb-6" style={{ padding: 'var(--space-sm)' }}>
+            <div className="flex items-center gap-4" style={{ flexWrap: 'wrap' }}>
+              <div className="flex items-center gap-1 flex-1" style={{ minWidth: '200px', borderRight: '1px solid var(--outline)', paddingRight: 'var(--space-sm)' }}>
+                <Search size={16} className="text-on-surface-variant" />
                 <input type="text" placeholder="Search local weights..." className="form-input" style={{ border: 'none', background: 'transparent', boxShadow: 'none' }} />
               </div>
-              <div className="flex items-center gap-xs text-muted" style={{ paddingRight: 'var(--space-sm)' }}>
+              <div className="flex items-center gap-1 text-on-surface-variant" style={{ paddingRight: 'var(--space-sm)' }}>
                 <Filter size={16} />
                 <span className="body-sm">All Weights</span>
               </div>
@@ -173,9 +174,9 @@ export function ModelsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
               {models.length === 0 ? (
                 <div className="card flex flex-col items-center justify-center" style={{ padding: '40px 0', borderStyle: 'dashed', gridColumn: '1 / -1' }}>
-                  <Cpu size={32} className="text-muted mb-md" />
+                  <Cpu size={32} className="text-on-surface-variant mb-4" />
                   <h3 className="headline-sm text-primary">No local weights found</h3>
-                  <p className="body-md text-muted mt-xs">Your weights folder is currently empty. Upload a weight file below.</p>
+                  <p className="body-md text-on-surface-variant mt-1">Your weights folder is currently empty. Upload a weight file below.</p>
                 </div>
               ) : (
                 models.map((model) => (
@@ -185,16 +186,16 @@ export function ModelsPage() {
                     onClick={() => setSelectedModel(model.name)}
                   >
                     <div className="flex justify-between items-start">
-                      <div className="flex gap-md items-start">
+                      <div className="flex gap-4 items-start">
                         <div style={{ padding: '10px', backgroundColor: 'var(--primary-container)', border: '1px solid var(--primary)' }}>
                           <Cpu size={24} className="text-primary" />
                         </div>
                         <div>
                           <h3 className="headline-sm">{model.display_name}</h3>
-                          <div className="mono-label mt-xs" style={{ backgroundColor: 'var(--surface-container-high)', padding: '4px 8px', border: '1px solid var(--outline)', display: 'inline-block' }}>
+                          <div className="mono-label mt-1" style={{ backgroundColor: 'var(--surface-container-high)', padding: '4px 8px', border: '1px solid var(--outline)', display: 'inline-block' }}>
                             {model.architecture || 'Custom'}
                           </div>
-                          <p className="body-sm text-muted mt-sm">{model.description}</p>
+                          <p className="body-sm text-on-surface-variant mt-2">{model.description}</p>
                         </div>
                       </div>
 
@@ -210,13 +211,13 @@ export function ModelsPage() {
           )}
 
           {/* Import Local Model Dropzone */}
-          <div className="card mb-lg card-interactive" style={{ borderStyle: 'dashed', textAlign: 'center', backgroundColor: 'var(--surface-container-lowest)' }}>
+          <div className="card mb-6 card-interactive" style={{ borderStyle: 'dashed', textAlign: 'center', backgroundColor: 'var(--surface-container-lowest)' }}>
             <label className="cursor-pointer flex flex-col items-center w-full">
               <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--surface-container)', border: '1px solid var(--outline)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-md)' }}>
                 {uploading ? <Loader2 className="animate-spin text-primary" size={24} /> : <Upload className="text-primary" size={24} />}
               </div>
-              <h3 className="headline-sm mb-xs">Import Local Model</h3>
-              <p className="body-sm text-muted mb-md">Upload weight files (.pt, .onnx, .safetensors)</p>
+              <h3 className="headline-sm mb-1">Import Local Model</h3>
+              <p className="body-sm text-on-surface-variant mb-4">Upload weight files (.pt, .onnx, .safetensors)</p>
               <div className="btn btn-secondary" style={{ pointerEvents: 'none' }}>
                 {uploading ? 'Uploading...' : 'Browse Files'}
               </div>

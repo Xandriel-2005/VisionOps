@@ -79,7 +79,7 @@ export function Sidebar({ theme, onToggleTheme }: SidebarProps) {
       </nav>
 
       <div className="sidebar-footer flex items-center justify-between">
-        <span className="body-sm text-muted">v0.1.0</span>
+        <span className="body-sm text-on-surface-variant">v0.1.0</span>
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>
     </aside>

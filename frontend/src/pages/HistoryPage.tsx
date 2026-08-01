@@ -64,24 +64,24 @@ export function HistoryPage() {
     <div className="pb-xl">
       <div className="page-header flex justify-between items-start glass-panel p-lg rounded-xl mb-xl">
         <div>
-          <h1 className="text-gradient font-bold text-4xl mb-xs">Run History</h1>
-          <p className="text-muted flex items-center gap-sm">
+          <h1 className="text-gradient font-bold text-4xl mb-1">Run History</h1>
+          <p className="text-on-surface-variant flex items-center gap-2">
             View past training runs, compare metrics, and reload previous configurations.
           </p>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center h-[50vh] gap-md">
+        <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
           <Loader2 className="animate-spin text-primary" size={48} />
-          <p className="text-muted animate-pulse">Loading history...</p>
+          <p className="text-on-surface-variant animate-pulse">Loading history...</p>
         </div>
       ) : runs.length === 0 ? (
-        <div className="card glass-panel text-center py-24 flex flex-col items-center justify-center gap-md relative overflow-hidden group">
+        <div className="card glass-panel text-center py-24 flex flex-col items-center justify-center gap-4 relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-accent opacity-50" />
-          <History size={64} className="text-muted opacity-30 group-hover:scale-110 transition-transform duration-500 group-hover:text-primary" />
-          <h3 className="headline-lg text-foreground mt-sm">No runs yet</h3>
-          <p className="body-lg text-muted mb-md max-w-md">You haven't launched any training runs yet. Configure your first experiment to get started.</p>
+          <History size={64} className="text-on-surface-variant opacity-30 group-hover:scale-110 transition-transform duration-500 group-hover:text-primary" />
+          <h3 className="headline-lg text-foreground mt-2">No runs yet</h3>
+          <p className="body-lg text-on-surface-variant mb-4 max-w-md">You haven't launched any training runs yet. Configure your first experiment to get started.</p>
           <button className="btn btn-primary" onClick={() => navigate('/config')}>
             Configure New Run
           </button>
@@ -93,43 +93,43 @@ export function HistoryPage() {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-surface-raised/40">
                 <tr>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted uppercase">Run ID</th>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted uppercase">Model</th>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted uppercase">Dataset</th>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted uppercase">Status</th>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted uppercase">Date</th>
-                  <th className="p-md text-sm font-semibold tracking-wider text-muted text-right uppercase pr-lg">Actions</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant uppercase">Run ID</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant uppercase">Model</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant uppercase">Dataset</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant uppercase">Status</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant uppercase">Date</th>
+                  <th className="p-md text-sm font-semibold tracking-wider text-on-surface-variant text-right uppercase pr-lg">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id} className="border-t border-border hover:bg-surface-raised/30 transition-colors group">
-                    <td className="p-md font-mono text-muted text-sm group-hover:text-primary transition-colors">
+                    <td className="p-md font-mono text-on-surface-variant text-sm group-hover:text-primary transition-colors">
                       #{run.id.toString().padStart(4, '0')}
                     </td>
                     <td className="p-md">
-                      <div className="flex items-center gap-sm">
+                      <div className="flex items-center gap-2">
                         <Database size={16} className="text-accent opacity-70" />
                         <span className="font-medium text-foreground">{run.model_name}</span>
                       </div>
                     </td>
                     <td className="p-md">
-                      <div className="flex items-center gap-sm">
-                        <FolderTree size={16} className="text-muted" />
-                        <span className="font-mono text-sm text-muted">{run.dataset_path.split(/[\/\\]/).pop() || run.dataset_path}</span>
+                      <div className="flex items-center gap-2">
+                        <FolderTree size={16} className="text-on-surface-variant" />
+                        <span className="font-mono text-sm text-on-surface-variant">{run.dataset_path.split(/[\/\\]/).pop() || run.dataset_path}</span>
                       </div>
                     </td>
                     <td className="p-md">
                       <StatusChip status={run.status} />
                     </td>
-                    <td className="p-md text-sm text-muted">
+                    <td className="p-md text-sm text-on-surface-variant">
                       {new Date(run.created_at).toLocaleString(undefined, { 
                         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                       })}
                     </td>
-                    <td className="p-md flex justify-end gap-sm pr-lg">
+                    <td className="p-md flex justify-end gap-2 pr-lg">
                       <button 
-                        className="btn btn-outline border-border hover:border-primary/50 text-muted hover:text-primary" 
+                        className="btn btn-outline border-border hover:border-primary/50 text-on-surface-variant hover:text-primary" 
                         onClick={() => {
                           setRegisterModalRunId(run.id);
                           setRegistryName(run.model_name || '');
@@ -141,7 +141,7 @@ export function HistoryPage() {
                         <Save size={16} />
                       </button>
                       <button 
-                        className="btn btn-outline border-border hover:border-primary/50 text-muted hover:text-primary" 
+                        className="btn btn-outline border-border hover:border-primary/50 text-on-surface-variant hover:text-primary" 
                         onClick={() => handleReloadConfig(run.id)}
                         title="Reload configuration"
                         style={{ padding: '8px' }}
@@ -153,7 +153,7 @@ export function HistoryPage() {
                         onClick={() => navigate(`/tracking?run_id=${run.id}`)}
                         style={{ padding: '8px 16px' }}
                       >
-                        <span className="flex items-center gap-xs"><Activity size={16} /> <span className="font-medium">Track</span></span>
+                        <span className="flex items-center gap-1"><Activity size={16} /> <span className="font-medium">Track</span></span>
                       </button>
                     </td>
                   </tr>
@@ -170,12 +170,12 @@ export function HistoryPage() {
         onClose={() => setRegisterModalRunId(null)}
         title="Register Model"
       >
-        <div className="flex flex-col gap-md">
-          <p className="text-muted text-sm mb-sm">
+        <div className="flex flex-col gap-4">
+          <p className="text-on-surface-variant text-sm mb-2">
             Register this run's model into the MLflow Model Registry. This allows you to manage versions, stage models for production, and serve them.
           </p>
           
-          <div className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-foreground">Registry Name *</label>
             <input 
               type="text" 
@@ -186,7 +186,7 @@ export function HistoryPage() {
             />
           </div>
 
-          <div className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-foreground">Description (Optional)</label>
             <textarea 
               className="input-field min-h-[100px]" 
@@ -196,7 +196,7 @@ export function HistoryPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-sm mt-md">
+          <div className="flex justify-end gap-2 mt-4">
             <button className="btn btn-outline" onClick={() => setRegisterModalRunId(null)} disabled={isRegistering}>
               Cancel
             </button>
@@ -206,7 +206,7 @@ export function HistoryPage() {
               disabled={isRegistering || !registryName.trim()}
             >
               {isRegistering ? (
-                <span className="flex items-center gap-xs"><Loader2 className="animate-spin" size={16} /> Registering...</span>
+                <span className="flex items-center gap-1"><Loader2 className="animate-spin" size={16} /> Registering...</span>
               ) : 'Register Model'}
             </button>
           </div>

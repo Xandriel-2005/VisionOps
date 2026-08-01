@@ -89,14 +89,14 @@ export function InferencePage() {
     <div>
       <div className="page-header">
         <h1>Inference Testing</h1>
-        <p className="body-md text-muted">Upload an image and run predictions using your trained models.</p>
+        <p className="body-md text-on-surface-variant">Upload an image and run predictions using your trained models.</p>
       </div>
 
-      <div className="grid-2">
+      <div className="grid grid-cols-2 gap-4">
         <div className="card h-fit">
-          <h3 className="headline-sm mb-md flex items-center gap-xs"><Target size={18} className="text-primary" /> Configuration</h3>
+          <h3 className="headline-sm mb-4 flex items-center gap-1"><Target size={18} className="text-primary" /> Configuration</h3>
           
-          <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-4">
             <div className="form-group">
               <label className="label-caps">Model Architecture</label>
               <select className="input" value={selectedModel} onChange={e => setSelectedModel(e.target.value)}>
@@ -109,7 +109,7 @@ export function InferencePage() {
             <div className="form-group">
               <label className="label-caps flex justify-between">
                 <span>Custom Weights Path</span>
-                <span className="text-muted font-normal">(Optional)</span>
+                <span className="text-on-surface-variant font-normal">(Optional)</span>
               </label>
               <input 
                 type="text" 
@@ -118,7 +118,7 @@ export function InferencePage() {
                 value={weightsPath}
                 onChange={e => setWeightsPath(e.target.value)}
               />
-              <span className="body-sm text-muted mt-xs">Leave blank to use base pretrained weights.</span>
+              <span className="body-sm text-on-surface-variant mt-1">Leave blank to use base pretrained weights.</span>
             </div>
             
             <div className="form-group">
@@ -138,9 +138,9 @@ export function InferencePage() {
           </div>
         </div>
         
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-4">
           {error && (
-            <div className="p-md rounded-md bg-status-failed/10 border-status-failed text-error" style={{ border: '1px solid var(--error)', backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)' }}>
+            <div className="p-md rounded-md bg-status-failed/10 border-status-failed text-status-failed" style={{ border: '1px solid var(--error)', backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)' }}>
               {error}
             </div>
           )}
@@ -178,7 +178,7 @@ export function InferencePage() {
                   style={{ maxHeight: '350px', objectFit: 'contain', borderRadius: '4px' }} 
                 />
                 
-                <div className="absolute top-sm right-sm flex gap-sm">
+                <div className="absolute top-sm right-sm flex gap-2">
                   <button 
                     className="btn btn-secondary shadow-lg" 
                     onClick={(e) => { e.stopPropagation(); setSelectedFile(null); setPreviewUrl(null); setResult(null); }}
@@ -197,9 +197,9 @@ export function InferencePage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center text-muted flex flex-col items-center pointer-events-none">
-                <Upload size={48} className="mb-md opacity-50" />
-                <h3 className="headline-sm mb-xs">Upload an Image</h3>
+              <div className="text-center text-on-surface-variant flex flex-col items-center pointer-events-none">
+                <Upload size={48} className="mb-4 opacity-50" />
+                <h3 className="headline-sm mb-1">Upload an Image</h3>
                 <p className="body-md">Drag and drop or click to browse</p>
               </div>
             )}
@@ -207,11 +207,11 @@ export function InferencePage() {
           
           {result && (
             <div className="card">
-              <h3 className="headline-sm mb-md">Detection Results</h3>
+              <h3 className="headline-sm mb-4">Detection Results</h3>
               <div className="bg-surface-highest p-sm rounded-md mono-sm" style={{ backgroundColor: '#1e1e1e', color: '#d4d4d4', overflowX: 'auto' }}>
                 <pre>{JSON.stringify(result, null, 2)}</pre>
               </div>
-              <p className="body-sm text-muted mt-sm">Note: Box rendering over the image will be implemented in UI Polish.</p>
+              <p className="body-sm text-on-surface-variant mt-2">Note: Box rendering over the image will be implemented in UI Polish.</p>
             </div>
           )}
         </div>

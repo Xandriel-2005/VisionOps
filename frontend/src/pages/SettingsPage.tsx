@@ -95,31 +95,31 @@ export function SettingsPage() {
     <div>
       <div className="page-header">
         <h1>Settings</h1>
-        <p className="body-md text-muted">Manage remote GPU profiles for executing training jobs.</p>
+        <p className="body-md text-on-surface-variant">Manage remote GPU profiles for executing training jobs.</p>
       </div>
 
-      <div className="grid-2">
-        <div className="flex flex-col gap-md">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {profiles.length === 0 ? (
-            <div className="card text-center py-lg text-muted">
-              <Server size={32} className="mx-auto mb-sm opacity-50" />
+            <div className="card text-center py-6 text-on-surface-variant">
+              <Server size={32} className="mx-auto mb-2 opacity-50" />
               <p>No GPU profiles configured.</p>
             </div>
           ) : (
             profiles.map(profile => (
               <div key={profile.id} className="card flex justify-between items-start" style={{ border: editingId === profile.id ? '1px solid var(--primary)' : undefined }}>
                 <div>
-                  <h3 className="headline-sm flex items-center gap-xs"><Server size={16} className="text-primary" /> {profile.name}</h3>
-                  <div className="mt-sm flex flex-col gap-xs">
-                    <span className="mono-sm text-muted">Host: {profile.host}</span>
-                    <span className="mono-sm text-muted">User: {profile.username}</span>
+                  <h3 className="headline-sm flex items-center gap-1"><Server size={16} className="text-primary" /> {profile.name}</h3>
+                  <div className="mt-2 flex flex-col gap-1">
+                    <span className="mono-sm text-on-surface-variant">Host: {profile.host}</span>
+                    <span className="mono-sm text-on-surface-variant">User: {profile.username}</span>
                   </div>
                 </div>
-                <div className="flex gap-sm">
+                <div className="flex gap-2">
                   <button className="btn btn-ghost" style={{ padding: '8px' }} onClick={() => handleEdit(profile)}>
                     <Edit2 size={16} />
                   </button>
-                  <button className="btn btn-ghost text-error" style={{ padding: '8px' }} onClick={() => handleDelete(profile.id)}>
+                  <button className="btn btn-ghost text-status-failed" style={{ padding: '8px' }} onClick={() => handleDelete(profile.id)}>
                     <Trash2 size={16} />
                   </button>
                 </div>
@@ -129,9 +129,9 @@ export function SettingsPage() {
         </div>
 
         <div className="card h-fit">
-          <h3 className="headline-sm mb-md">{editingId ? 'Edit Profile' : 'New GPU Profile'}</h3>
+          <h3 className="headline-sm mb-4">{editingId ? 'Edit Profile' : 'New GPU Profile'}</h3>
           
-          <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-4">
             <div className="form-group">
               <label className="label-caps">Profile Name</label>
               <input type="text" className="input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. AWS A100 Instance" />
@@ -142,7 +142,7 @@ export function SettingsPage() {
               <input type="text" className="input" value={host} onChange={e => setHost(e.target.value)} placeholder="e.g. 192.168.1.100 or ec2-..." />
             </div>
             
-            <div className="grid-2 gap-sm">
+            <div className="grid grid-cols-2 gap-4 gap-2">
               <div className="form-group">
                 <label className="label-caps">SSH Username</label>
                 <input type="text" className="input" value={username} onChange={e => setUsername(e.target.value)} placeholder="e.g. ubuntu" />
@@ -159,7 +159,7 @@ export function SettingsPage() {
               <input type="text" className="input" value={venvPath} onChange={e => setVenvPath(e.target.value)} placeholder="e.g. /home/ubuntu/venv" />
             </div>
             
-            <div className="flex gap-sm mt-sm">
+            <div className="flex gap-2 mt-2">
               <button 
                 className="btn btn-primary flex-1" 
                 onClick={handleSave}

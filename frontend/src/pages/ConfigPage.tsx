@@ -70,18 +70,18 @@ export function ConfigPage() {
     <div>
       <div className="page-header">
         <h1>Training Configuration</h1>
-        <p className="body-md text-muted">Set hyperparameters and environment for the training run.</p>
+        <p className="body-md text-on-surface-variant">Set hyperparameters and environment for the training run.</p>
       </div>
 
-      <div className="grid-2 mb-md">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         {/* Hyperparameters Card */}
         <div className="card">
-          <h3 className="headline-sm mb-md flex items-center gap-xs">
+          <h3 className="headline-sm mb-4 flex items-center gap-1">
             <Settings2 size={18} className="text-primary" /> Hyperparameters
           </h3>
           
-          <div className="flex flex-col gap-md">
-            <div className="grid-2">
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="form-group">
                 <label className="form-label">Epochs</label>
                 <input 
@@ -104,7 +104,7 @@ export function ConfigPage() {
               </div>
             </div>
 
-            <div className="grid-2">
+            <div className="grid grid-cols-2 gap-4">
               <div className="form-group">
                 <label className="form-label">Learning Rate</label>
                 <input 
@@ -130,10 +130,10 @@ export function ConfigPage() {
         </div>
 
         {/* Data & Environment Card */}
-        <div className="card flex flex-col gap-md">
+        <div className="card flex flex-col gap-4">
           <div className="form-group">
             <label className="form-label">Train / Validation Split</label>
-            <div className="flex items-center gap-sm">
+            <div className="flex items-center gap-2">
               <input 
                 type="range" 
                 className="flex-1" 
@@ -145,8 +145,8 @@ export function ConfigPage() {
             </div>
           </div>
 
-          <div className="form-group mt-sm">
-            <label className="flex items-center gap-sm cursor-pointer">
+          <div className="form-group mt-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input 
                 type="checkbox" 
                 checked={config.use_bg_injection}
@@ -154,10 +154,10 @@ export function ConfigPage() {
               />
               <span className="body-md">Inject Background Images (Negative Samples)</span>
             </label>
-            <p className="form-hint ml-lg mt-xs">Helps reduce false positives by showing the model empty backgrounds.</p>
+            <p className="form-hint ml-lg mt-1">Helps reduce false positives by showing the model empty backgrounds.</p>
             
             {config.use_bg_injection && (
-              <div className="mt-sm ml-lg p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
+              <div className="mt-2 ml-lg p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
                 <label className="form-label">Background Images Folder</label>
                 <input 
                   type="text" 
@@ -166,12 +166,12 @@ export function ConfigPage() {
                   value={config.bg_images_path || ''}
                   onChange={e => handleChange('bg_images_path', e.target.value)}
                 />
-                <p className="form-hint mt-xs">Path to a folder containing background images (no labels needed).</p>
+                <p className="form-hint mt-1">Path to a folder containing background images (no labels needed).</p>
               </div>
             )}
           </div>
 
-          <div className="form-group mt-md pt-md" style={{ borderTop: '1px solid var(--outline-variant)' }}>
+          <div className="form-group mt-4 pt-md" style={{ borderTop: '1px solid var(--outline-variant)' }}>
             <label className="form-label">Run Mode</label>
             <select 
               className="form-input" 
@@ -204,8 +204,8 @@ export function ConfigPage() {
         </div>
 
         {/* Run Scheduling Card */}
-        <div className="card flex flex-col gap-md" style={{ gridColumn: '1 / -1' }}>
-          <h3 className="headline-sm flex items-center gap-xs">
+        <div className="card flex flex-col gap-4" style={{ gridColumn: '1 / -1' }}>
+          <h3 className="headline-sm flex items-center gap-1">
             <Clock size={18} className="text-primary" /> Run Scheduling
           </h3>
           
@@ -224,7 +224,7 @@ export function ConfigPage() {
 
           {config.schedule_type === 'recurring' && (
             <div className="form-group p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
-              <label className="form-label flex items-center gap-xs"><Calendar size={14} /> Cron Expression</label>
+              <label className="form-label flex items-center gap-1"><Calendar size={14} /> Cron Expression</label>
               <input 
                 type="text" 
                 className="form-input form-input-mono" 
@@ -232,20 +232,20 @@ export function ConfigPage() {
                 value={config.schedule_expression || ''}
                 onChange={e => handleChange('schedule_expression', e.target.value)}
               />
-              <p className="form-hint mt-xs">Use standard cron syntax (e.g. "0 0 * * *" for daily at midnight). Airflow will automatically generate a dynamic DAG for this schedule.</p>
+              <p className="form-hint mt-1">Use standard cron syntax (e.g. "0 0 * * *" for daily at midnight). Airflow will automatically generate a dynamic DAG for this schedule.</p>
             </div>
           )}
 
           {config.schedule_type === 'one_time_future' && (
             <div className="form-group p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
-              <label className="form-label flex items-center gap-xs"><Clock size={14} /> Scheduled Date & Time</label>
+              <label className="form-label flex items-center gap-1"><Clock size={14} /> Scheduled Date & Time</label>
               <input 
                 type="datetime-local" 
                 className="form-input" 
                 value={config.scheduled_for ? new Date(config.scheduled_for).toISOString().slice(0, 16) : ''}
                 onChange={e => handleChange('scheduled_for', new Date(e.target.value).toISOString())}
               />
-              <p className="form-hint mt-xs">Select when the run should execute. Airflow will generate a single-run DAG for this time.</p>
+              <p className="form-hint mt-1">Select when the run should execute. Airflow will generate a single-run DAG for this time.</p>
             </div>
           )}
         </div>

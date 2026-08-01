@@ -94,45 +94,45 @@ export function LaunchPage() {
     <div>
       <div className="page-header">
         <h1>Review & Launch</h1>
-        <p className="body-md text-muted">Review your configuration before kicking off the training pipeline.</p>
+        <p className="body-md text-on-surface-variant">Review your configuration before kicking off the training pipeline.</p>
       </div>
 
       {error && (
-        <div className="mb-md p-md rounded-md bg-status-failed/10 border-status-failed text-error" style={{ border: '1px solid var(--error)', backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)' }}>
+        <div className="mb-4 p-md rounded-md bg-status-failed/10 border-status-failed text-status-failed" style={{ border: '1px solid var(--error)', backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)' }}>
           {error}
         </div>
       )}
 
       {config && (
-        <div className="grid-2 mb-lg">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="card">
-            <h3 className="headline-sm mb-md flex items-center gap-xs">
+            <h3 className="headline-sm mb-4 flex items-center gap-1">
               <CheckCircle2 size={18} className="text-status-success" /> Pipeline Summary
             </h3>
             
-            <div className="flex flex-col gap-sm">
+            <div className="flex flex-col gap-2">
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Base Model</span>
+                <span className="text-on-surface-variant">Base Model</span>
                 <span className="mono-data">{config.model_name}</span>
               </div>
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Dataset</span>
+                <span className="text-on-surface-variant">Dataset</span>
                 <span className="mono-data">{config.dataset_path}</span>
               </div>
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Epochs</span>
+                <span className="text-on-surface-variant">Epochs</span>
                 <span className="mono-data">{config.epochs}</span>
               </div>
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Batch Size</span>
+                <span className="text-on-surface-variant">Batch Size</span>
                 <span className="mono-data">{config.batch_size}</span>
               </div>
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Image Size</span>
+                <span className="text-on-surface-variant">Image Size</span>
                 <span className="mono-data">{config.image_size}px</span>
               </div>
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Schedule</span>
+                <span className="text-on-surface-variant">Schedule</span>
                 <span className="label-caps">
                   {config.schedule_type === 'immediate' && 'Immediate'}
                   {config.schedule_type === 'recurring' && `Cron: ${config.schedule_expression}`}
@@ -143,25 +143,25 @@ export function LaunchPage() {
           </div>
           
           <div className="card">
-            <h3 className="headline-sm mb-md flex items-center gap-xs">
+            <h3 className="headline-sm mb-4 flex items-center gap-1">
               <Server size={18} className="text-primary" /> Execution Environment
             </h3>
             
-            <div className="flex flex-col gap-sm">
+            <div className="flex flex-col gap-2">
               <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                <span className="text-muted">Run Mode</span>
+                <span className="text-on-surface-variant">Run Mode</span>
                 <span className="label-caps">{config.run_mode.toUpperCase()}</span>
               </div>
               
               {config.run_mode === 'remote' && (
                 <div className="flex justify-between" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '8px' }}>
-                  <span className="text-muted">GPU Profile ID</span>
+                  <span className="text-on-surface-variant">GPU Profile ID</span>
                   <span className="mono-data">{config.remote_gpu_profile_id || 'Not selected'}</span>
                 </div>
               )}
               
-              <div className="mt-md p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
-                <p className="body-sm text-muted">
+              <div className="mt-4 p-md rounded-md" style={{ backgroundColor: 'var(--surface-container-highest)' }}>
+                <p className="body-sm text-on-surface-variant">
                   Clicking Launch will trigger the <span className="mono-data">visionops_training</span> DAG in Airflow, which will orchestrate preprocessing and execute the training script. Live metrics will be streamed via MLflow.
                 </p>
               </div>
@@ -181,9 +181,9 @@ export function LaunchPage() {
           style={{ paddingLeft: 'var(--space-xl)', paddingRight: 'var(--space-xl)' }}
         >
           {launching ? (
-            <span className="flex items-center gap-xs"><Loader2 className="animate-spin" size={16} /> Launching...</span>
+            <span className="flex items-center gap-1"><Loader2 className="animate-spin" size={16} /> Launching...</span>
           ) : (
-            <span className="flex items-center gap-xs"><Play size={16} /> Launch Training</span>
+            <span className="flex items-center gap-1"><Play size={16} /> Launch Training</span>
           )}
         </button>
       </div>
@@ -191,10 +191,10 @@ export function LaunchPage() {
       {showRemoteWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-surface p-xl rounded-lg max-w-lg w-full border border-outline-variant shadow-xl" style={{ margin: 'var(--space-md)' }}>
-            <h2 className="title-lg mb-md flex items-center gap-sm">
+            <h2 className="title-lg mb-4 flex items-center gap-2">
               <Server className="text-primary" /> Remote GPU Setup Required
             </h2>
-            <div className="body-md text-muted space-y-md">
+            <div className="body-md text-on-surface-variant space-y-md">
               <p>
                 You are about to launch training on a remote GPU server. 
                 Before proceeding, ensure the server meets these requirements:
@@ -205,12 +205,12 @@ export function LaunchPage() {
                 <li><strong className="text-on-surface">Dependencies:</strong> You must have Ultralytics (YOLO) and MLflow pre-installed in the default environment.</li>
                 <li><strong className="text-on-surface">Hardware:</strong> A properly configured GPU (e.g., CUDA drivers) must be available.</li>
               </ul>
-              <p className="mt-md form-hint">
+              <p className="mt-4 form-hint">
                 VisionOps Airflow will automatically create a temporary workspace workspace, copy the dataset and scripts via SSH, execute the training, and pull the trained weights back.
               </p>
             </div>
             
-            <div className="flex justify-end gap-md mt-xl pt-md border-t border-outline-variant">
+            <div className="flex justify-end gap-4 mt-xl pt-md border-t border-outline-variant">
               <button 
                 className="btn btn-ghost"
                 onClick={() => setShowRemoteWarning(false)}
