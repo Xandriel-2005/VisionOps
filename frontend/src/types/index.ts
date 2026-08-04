@@ -66,6 +66,8 @@ export interface ModelInfo {
   architecture: string;
   status: string;
   updated_at: string;
+  category?: string;
+  path?: string;
   metrics?: Record<string, string | number>;
   training_progress?: {
     epoch: number;

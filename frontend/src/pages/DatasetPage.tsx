@@ -27,6 +27,31 @@ export function DatasetPage() {
   };
 
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUploadZip = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    setUploading(true);
+    try {
+      const response = await api.post('/api/dataset/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data.status === 'success') {
+        setPath(response.data.path);
+        handleValidate(response.data.path);
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setResult({ valid: false, errors: ['Failed to upload ZIP file'], warnings: [], summary: null });
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = ''; // Reset input
+    }
+  };
 
   const handleNext = () => {
     if (result?.valid) {
@@ -63,6 +88,23 @@ export function DatasetPage() {
             </button>
           </div>
           <p className="form-hint">Directory must contain data.yaml, images/, and labels/ folders.</p>
+        </div>
+        
+        <div className="form-group mb-4" style={{ borderTop: '1px solid var(--outline)', paddingTop: '16px' }}>
+          <label className="form-label flex items-center gap-1 mb-2">
+            Upload ZIP Archive
+          </label>
+          <div className="flex gap-2 items-center">
+            <input 
+              type="file" 
+              accept=".zip" 
+              onChange={handleUploadZip} 
+              disabled={uploading}
+              className="block w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-container file:text-primary hover:file:bg-primary-container/80"
+            />
+            {uploading && <span className="text-primary body-sm">Extracting...</span>}
+          </div>
+          <p className="form-hint">Upload a YOLO-formatted dataset as a .zip file. It will be extracted automatically.</p>
         </div>
 
         {result && (

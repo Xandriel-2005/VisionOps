@@ -10,6 +10,11 @@ import matplotlib.pyplot as plt
 def setup_experiment(tracking_uri: str, experiment_name: str):
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
+    try:
+        # Enables logging of CPU, RAM, Network, Disk, and GPU (if pynvml is installed)
+        mlflow.enable_system_metrics_logging()
+    except Exception as e:
+        print(f"[mlflow_logger] WARNING: Could not enable system metrics: {e}")
 
 class EpochCallback:
     
@@ -127,20 +132,37 @@ def log_run_results(config: dict, final_metrics: dict, train_time: float, cb: Ep
             mlflow.log_artifact(p, artifact_path="metric_curves")
 
     yolo_out_dir = os.path.dirname(os.path.dirname(best_pt))
+
+    # Upload full training output (plots, confusion matrix, etc.)
     try:
         if os.path.exists(yolo_out_dir):
             mlflow.log_artifacts(yolo_out_dir, artifact_path="yolo_full_output")
+    except Exception as e:
+        print(f"[mlflow_logger] WARNING: Could not log yolo output dir: {e}")
 
+    # Upload best.pt weights
+    try:
         if os.path.exists(best_pt):
             mlflow.log_artifact(best_pt, artifact_path="weights")
+    except Exception as e:
+        print(f"[mlflow_logger] WARNING: Could not log best.pt artifact: {e}")
+
+    # Upload last.pt weights
+    try:
+        last_pt = best_pt.replace("best.pt", "last.pt")
+        if os.path.exists(last_pt):
+            mlflow.log_artifact(last_pt, artifact_path="weights")
+    except Exception as e:
+        print(f"[mlflow_logger] WARNING: Could not log last.pt artifact: {e}")
+
+    # Register as pyfunc model (may fail on older MLflow servers — not critical)
+    try:
+        if os.path.exists(best_pt):
             mlflow.pyfunc.log_model(
                 artifact_path="model",
                 python_model=UltralyticsWrapper(),
                 artifacts={"weights": best_pt},
             )
-
-        last_pt = best_pt.replace("best.pt", "last.pt")
-        if os.path.exists(last_pt):
-            mlflow.log_artifact(last_pt, artifact_path="weights")
     except Exception as e:
-        print(f"[mlflow_logger] WARNING: Could not log run artifacts/models: {e}")
+        print(f"[mlflow_logger] WARNING: Could not log pyfunc model (non-critical): {e}")
+

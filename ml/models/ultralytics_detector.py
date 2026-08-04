@@ -68,23 +68,33 @@ class UltralyticsDetector(BaseDetector):
             "cls_loss":  round(m.get("train/cls_loss", 0), 4),
         }
 
-    def infer(self, source_path: str, conf_threshold: float = 0.25) -> list[dict]:
+    def infer(self, source_path: str, conf_threshold: float = 0.25, save_dir: str = None) -> list[dict]:
         if not self.model:
             raise RuntimeError("Model not loaded.")
-        results = self.model(source_path, conf=conf_threshold)
+            
+        kwargs = {"conf": conf_threshold}
+        if save_dir:
+            kwargs["save"] = True
+            kwargs["project"] = save_dir
+            kwargs["name"] = "" # Prevents creating 'predict' subfolder
+            kwargs["exist_ok"] = True
+            
+        results = self.model(source_path, **kwargs)
+        
         detections = []
         for r in results:
             boxes = r.boxes
-            for i in range(len(boxes)):
-                b = boxes[i]
-                conf = float(b.conf[0])
-                cls_id = int(b.cls[0])
-                cls_name = self.model.names[cls_id]
-                x1, y1, x2, y2 = b.xyxy[0].tolist()
-                detections.append({
-                    "bbox": [x1, y1, x2, y2],
-                    "confidence": conf,
-                    "class_id": cls_id,
-                    "class_name": cls_name
-                })
+            if boxes:
+                for i in range(len(boxes)):
+                    b = boxes[i]
+                    conf = float(b.conf[0])
+                    cls_id = int(b.cls[0])
+                    cls_name = self.model.names[cls_id]
+                    x1, y1, x2, y2 = b.xyxy[0].tolist()
+                    detections.append({
+                        "bbox": [x1, y1, x2, y2],
+                        "confidence": conf,
+                        "class_id": cls_id,
+                        "class_name": cls_name
+                    })
         return detections

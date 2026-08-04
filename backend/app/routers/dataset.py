@@ -99,3 +99,40 @@ if folder:
     except Exception as e:
         print(f"Error opening native browser: {e}")
         return {"path": ""}
+
+import shutil
+import zipfile
+from fastapi import UploadFile, File
+
+@router.post("/upload")
+async def upload_dataset(file: UploadFile = File(...)):
+    """Uploads a ZIP file and extracts it to the datasets directory."""
+    if not file.filename.lower().endswith(".zip"):
+        raise HTTPException(status_code=400, detail="Only .zip files are supported for dataset uploads.")
+        
+    workspace_root = os.path.abspath(os.environ.get("HOST_PROJECT_ROOT", os.path.join(os.path.dirname(__file__), "../../..")))
+    datasets_dir = os.path.join(workspace_root, "datasets")
+    os.makedirs(datasets_dir, exist_ok=True)
+    
+    # Save the zip file temporarily
+    tmp_zip = os.path.join(datasets_dir, file.filename)
+    with open(tmp_zip, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Extract
+    dataset_name = file.filename[:-4]
+    extract_path = os.path.join(datasets_dir, dataset_name)
+    os.makedirs(extract_path, exist_ok=True)
+    
+    try:
+        with zipfile.ZipFile(tmp_zip, 'r') as zip_ref:
+            zip_ref.extractall(extract_path)
+    except zipfile.BadZipFile:
+        os.remove(tmp_zip)
+        raise HTTPException(status_code=400, detail="Invalid ZIP file.")
+        
+    # Clean up the zip file
+    os.remove(tmp_zip)
+    
+    return {"status": "success", "path": extract_path, "name": dataset_name}
+

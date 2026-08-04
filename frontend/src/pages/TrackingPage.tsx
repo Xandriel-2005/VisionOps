@@ -296,7 +296,7 @@ export function TrackingPage() {
                 className={`
                   z-10 flex items-center gap-2 px-4 py-2 rounded-lg border-2 shadow-sm transition-all
                   ${isRunning ? 'border-primary bg-[#001122] shadow-[0_0_15px_rgba(0,240,255,0.4)] animate-pulse-border' : ''}
-                  ${isSuccess ? 'border-success bg-[#002211] hover:bg-[#00331a]' : ''}
+                  ${isSuccess ? 'border-status-success bg-[#003311] shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:bg-[#00441a]' : ''}
                   ${isFailed ? 'border-error bg-[#220000] hover:bg-[#330000]' : ''}
                   ${isSkipped ? 'border-[#ff69b4] bg-[#33001a] opacity-80 hover:opacity-100' : ''}
                   ${isNone ? 'border-outline bg-surface-dim opacity-50 hover:border-primary/50' : ''}

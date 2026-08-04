@@ -116,11 +116,12 @@ with DAG(
         """,
         docker_url='unix://var/run/docker.sock',
         network_mode='visionops_visionops',
+        shm_size='2g',
         mounts=[
             Mount(source=f'{HOST_PROJECT_ROOT}/ml', target='/app/ml', type='bind', read_only=True),
             Mount(source=f'{HOST_PROJECT_ROOT}/datasets', target='/opt/airflow/datasets', type='bind'),
             Mount(source=f'{HOST_PROJECT_ROOT}/models', target='/opt/airflow/models', type='bind'),
-            Mount(source=f'{HOST_PROJECT_ROOT}/runs', target='/app/runs', type='bind')
+            Mount(source=f'{HOST_PROJECT_ROOT}/runs', target='/app/runs', type='bind'),
         ],
         environment={
             'MLFLOW_TRACKING_URI': 'http://mlflow:5000',
@@ -128,8 +129,7 @@ with DAG(
         }
     )
 
-    # ── REMOTE training path (adapted from ml-pipeline gpu_ssh_helpers) ──
-
+    #  REMOTE training path
     # 1. Sync code, weights, dataset, and scripts to the remote GPU server
     sync_to_gpu = BashOperator(
         task_id='sync_to_gpu',
@@ -178,7 +178,7 @@ with DAG(
           --image-size {{{{ dag_run.conf.get("image_size", 640) }}}} \\
           --run-id '{{{{ dag_run.conf.get("run_id", "") }}}}'"
         """,
-        execution_timeout=None,  # Training can take hours
+        execution_timeout=None,
     )
 
     # 3. Sync trained weights back from the remote GPU server
@@ -220,7 +220,7 @@ with DAG(
         trigger_rule='all_done',
     )
 
-    # ── Merge point after local OR remote training ──
+    # Merge point after local OR remote training
     merge_training_branch = EmptyOperator(
         task_id='merge_training_branch',
         trigger_rule='none_failed_min_one_success',
